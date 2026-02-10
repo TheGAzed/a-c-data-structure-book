@@ -1,5 +1,42 @@
 \chapter{Stacks}
 
-\section{Stack Abstract Data Type}
+Lets imagine we have a stack of books. The normal way we can add another one to the stack is by putting it at the top, if we put the book with the cover pointing upwards one is able to know what book exactly is at the top. To remove a book we just grab the top one and put it somewhere else.
+
+By making space for another stack of books and adding all the books from the first one while the constrains of putting and removing still remain we get a new stack, but with a specific property that, when compared with our initial one, makes us tilt our head (literally), because the new one is just like the last one, but with the books in opposite order. This little property allows us to invert the order of any linear data structure without knowing how it's implemented, if the structure allows us to add and remove elements.
+
+Continuing with the two stack analogy, what if instead of books we stored a game of chess. By adding these moves one-by-one \ref{fig:chess-moves}: E2-E4, E7-E5, G1-F3, B8-C6, D2-D4, E5-D4, F3-D4, F8-C5, C2-C3, D8-F6, D4-C6, F6-F2; we get probably the funniest chess game in modern history \footnote{that can be watched via \url{https://www.youtube.com/watch?v=e91M0XLX7Jw}}. And on top of that if we remove the two moves from the top and reset the pieces (F6-F2 becomes F2-F6), iteratively it is possible to return to the initial state of the game. And to top it all of, as probably every data structure book and article about stacks writes this mechanism is used by search engines when you want to return to the previous pages and back.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/stack/chess-moves}
+    \caption{The entire game of chess between content creators xQc and MoistCr1tikal.}
+    \label{fig:chess-moves}
+\end{figure}
+
+Stacks are also used to store function calls in programming languages like C to be able to know to what previous in memory place the program should go to after the top function returns.
+
 \section{Implementations of a Stack}
+
+Every computer science student learns that the two most common ways to implement a stack in C are:
+
+\begin{enumerate}
+    \item Singly linked lists
+    \item Static/dynamic arrays
+\end{enumerate}
+
+So why does this book have three subsections for stack implementations?
+
+\subsection{The humble linked list}
+
+For a more in-depth explanation of lists you can infer to PART \ref{p:two} \nameref{p:two}, but in short a linked list is a linear data structure which allows us to store data sequentially as well as store a reference to the next data item \ref{fig:linked-list}.
+
+The linked list consists of two special nodes which represent the beginning and the end - head and tail. Most linked list implementation will store the reference to the head, so it is generally easy to access the first element as oppose to the tail, since the user needs to follow all the arrows until they reach it.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/stack/linked-list}
+    \caption{A simple graphical linked list example.}
+    \label{fig:linked-list}
+\end{figure}
+
 \section{Dynamic Array Stack Structure}
