@@ -16,6 +16,36 @@
 \usepackage{type1cm}         
 \usepackage{hyperref}
 
+\usepackage{xcolor}
+\usepackage{listings}
+
+\definecolor{vsblue}{RGB}{0,0,255}
+\definecolor{vsgreen}{RGB}{0,128,0}
+\definecolor{vsred}{RGB}{163,21,21}
+\definecolor{vscyan}{RGB}{43,145,175}
+
+\lstdefinestyle{VisualStudio}{
+    language=C,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{vsblue},
+    commentstyle=\color{vsgreen},
+    stringstyle=\color{vsred},
+    directivestyle=\color{vscyan},
+    breaklines=true,
+    showstringspaces=false
+}
+
+\usepackage[most]{tcolorbox}
+
+\newtcolorbox{infobox}[1][]{
+  colback=gray!10!white,
+  colframe=white!25!black,
+  fonttitle=\bfseries,
+  arc=0mm,
+  breakable, % Allows box to break across pages
+  #1
+}
+
 \usepackage{makeidx}         % allows index generation
 \usepackage{graphicx}        % standard LaTeX graphics tool
                              % when including figure files
