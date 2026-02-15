@@ -83,7 +83,7 @@ To get the top element we can store the total element count as LENGTH, then simp
 
 \section{Array stack structure code}
 
-At the end I have decided to pick simple array-based stacks for one simple reason - continuous memory layout. I want to allow users to sort elements in the stack in order the have the same functionality as a priority queue, i.e. retrieving elements based on a priority, like the minimum. Of course the priority would be in reverse since the stack would get the last element in the array. It is possible to sort elements using the aforementioned implementations, but that requires creating a temporary array to copy elements back and forth. In chapter \nameref{ch:deque} the double ended queue data structure, which is implemented similar to a list of arrays, can also be used as a stack with the same list-array advantages.
+At the end I have decided to pick simple array-based stacks for one simple reason - continuous memory layout. I want to allow users to sort elements in the stack in order the have the same functionality as a priority queue, i.e. retrieving elements based on a priority, like the minimum. Of course the priority would be in reverse since the stack would get the last element in the array. It is possible to sort elements using the aforementioned implementations, but that requires creating a temporary array to copy elements back and forth. In chapter \nameref{ch:deque} the double ended queue data structure, which is implemented similar to a list of arrays, can also be used as a stack alternative with the list-array advantages.
 
 \subsection{The infinite stack}
 
@@ -98,7 +98,18 @@ typedef struct infinite_stack {
 } istack_s;
 \end{lstlisting}
 
-\subsection{Creating the stack}
+\subsubsection{Shrinking, expanding, resizing}
+
+Infinite expansion and shrinking require the understanding of reallocating memory and implementation of the \texttt{\_istack\_resize} function.
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:create-stack]
+/// @brief Resizes (reallocates) stack parameter arrays based on changed capacity.
+/// @param stack Structure to resize.
+/// @param size New size.
+void _istack_resize(istack_s * const stack, size_t const size);
+\end{lstlisting}
+
+\subsubsection{Creating the stack}
 
 The \texttt{create\_istack} function creates an empty infinite stack structure storing the element size and allocator.
 
@@ -118,7 +129,7 @@ The creation process uses a compound literal to quickly create and return a new 
 }
 \end{lstlisting}
 
-\subsection{The makings of a stack}
+\subsubsection{The makings of a stack}
 
 The \texttt{make\_fstack} function, similar to \texttt{create\_fstack}, creates an infinite stack structure, but with the ability to specify a custom memory allocator.
 
@@ -139,7 +150,7 @@ The code is basically the same as the aforementioned function, but with the \tex
 }
 \end{lstlisting}
 
-\subsection{Stack destruction}
+\subsubsection{Stack destruction}
 
 Next, \texttt{destroy\_istack} destroys the stack and all its elements while at the same time making it invalid for future usage. The parameters include a pointer to the stack and a function pointer taking in each element, allowing the user to manipulate with elements prior to their destruction. The \texttt{destroy} function can primarily be used to free memory, like strings or character arrays, from the heap.
 
@@ -186,11 +197,11 @@ The \texttt{memset} function allows us to effectively set every member of a stru
 void *memset(void s[n], int c, size_t n);
 \end{lstlisting}
 
-\begin{infobox}
+\begin{infobox}[title=Linux manual page - memset(3)]
 The \texttt{memset()} function fills the first n bytes of the memory area pointed to by s with the constant byte c.
 \end{infobox}
 
-\subsection{Clearing up the stack}
+\subsubsection{Clearing up the stack}
 
 Similar to \texttt{destroy\_istack}, \texttt{clear\_istack} can be used to destroy each element in our structure, but the stack remains valid for next use. This is achieved by freeing the elements array and setting the stack's length and capacity to zero, and elements array NULL.
 
@@ -210,9 +221,9 @@ void clear_istack(istack_s * const stack, set_fn const destroy);
 }
 \end{lstlisting}
 
-\subsection{The deep/shallow copy}
+\subsubsection{The deep/shallow copy}
 
-Creating a copy, either with all nested sub-elements recreated deeply or referenced shallowly, can be done with the \texttt{copy\_istack} function. The main idea is to use a special \texttt{copy} function pointer which takes in a destination element memory address of the replica structure and a source address from the parameter and copies source element into destination element and returning the destination address. This functionality is similar to the \texttt{memcpy} function in \texttt{<string.h>}, which takes a destination address, source address, and the size of the memory area to copy.
+Creating a copy can be done with the \texttt{copy\_istack} function. This functionality is similar to the \texttt{memcpy} function in \texttt{<string.h>}, which takes a destination address, source address, and the size of the memory area to copy.
 
 \begin{lstlisting}[language=C, style=VisualStudio, label=lst:memcpy, caption={The \texttt{memcpy} function prototype from the Linux/UNIX manual page.}]
 #include <string.h>
@@ -258,7 +269,7 @@ All elements are later copied individually from source stack's memory at index p
 }
 \end{lstlisting}
 
-\subsection{Checking emptiness}
+\subsubsection{Checking emptiness}
 
 Since we can't remove elements from an empty stack, the function available to help with this is the \texttt{is\_empty\_istack}.
 
@@ -276,7 +287,7 @@ bool is_empty_istack(istack_s const * const stack);
 }
 \end{lstlisting}
 
-\subsection{Pushups to the top}
+\subsubsection{Pushups to the top}
 
 To add an element one can use the the \texttt{push\_istack} function. Since the stack is implemented using a resizable array checking if maximum capacity has been reached is a must. The index of where to push the element can be gained through the stack length member.
 
@@ -308,7 +319,7 @@ As the size of a single element is user-define, the only optimal way to copy the
 }
 \end{lstlisting}
 
-\subsection{Popping it}
+\subsubsection{Popping it}
 
 Removal of elements is done through the \texttt{pop\_istack} function. If the structure is empty the program logically errors.
 
@@ -339,7 +350,7 @@ The structure adjusts itself during growth, therefore it is important to not was
 }
 \end{lstlisting}
 
-\subsection{Reaching the peep}
+\subsubsection{Reaching the peep}
 
 Peeping the last added element via \texttt{peep\_istack} is a little bit like popping it.
 
@@ -360,7 +371,7 @@ The idea is to just get the element index at \texttt{length - 1} and save it int
 }
 \end{lstlisting}
 
-\subsection{Each element}
+\subsubsection{Each element}
 
 Each element can be accessed and manipulated through the special \texttt{each\_istack} function which iterates beginning not at the top, but at the bottom,
 and them making its way up to the top. The reason it starts at the bottom is because it make printing the values easier.
@@ -383,7 +394,7 @@ All the element are in an array, thus iterating over them is as simple as using 
 }
 \end{lstlisting}
 
-\subsection{Applying mostly sorting}
+\subsubsection{Applying mostly sorting}
 
 The \texttt{apply\_istack} gives access to all the elements as if they were inside a continuous array, which doesn't really matter for stacks, but it is extremely useful for structures in other chapters, like \nameref{ch:queue}. The main use of \texttt{apply\_istack} is to sort the array of element as fast as the sorting function pointer \texttt{process} and its generic \texttt{arguments} allow.
 
@@ -405,6 +416,114 @@ Similarly to the \texttt{each\_istack}, the \texttt{apply\_istack} only has one 
 }
 \end{lstlisting}
 
+\section{Example usage}
 
+\subsection{Creating and destroying/clearing a stack of integers}
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:each-stack-01]
+#include <sequence/istack.h>
+
+void intdst(void * const element) {
+    (*(int*)element) = 0; // to set, or just use (void)(element);
+}
+
+int main(void) {
+    istack_s stack = create_istack(sizeof(int));
+
+    clear_istack(&stack, intdst);
+
+    destroy_istack(&stack, intdst);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Pushing, peeping and popping integer elements}
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:each-stack-01]
+#include <stdio.h>
+#include <sequence/istack.h>
+
+void intdst(void * const element) {
+    (*(int*)element) = 0;
+    // (void)(element);
+}
+
+int main(void) {
+    istack_s stack = create_istack(sizeof(int));
+
+    // push 10 elements
+    for(int i = 0; i < 10; i++) {
+        push_istack(&stack, &i);
+    }
+
+    // check if top element is 9
+    int v = -1;
+    peep_istack(&stack, &v);
+    printf("%d ", v);
+
+    // pop and print all element 
+    while(!is_empty_istack(&stack)) {
+        pop_istack(&stack, &v);
+        printf("%d ", v);
+    }
+
+    destroy_istack(&stack, intdst);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Iterating and sorting}
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:each-stack-01]
+#include <stdio.h>
+#include <stdlib.h>
+#include <sequence/istack.h>
+
+void intdst(void * const element) {
+    (*(int*)element) = 0;
+    // (void)(element);
+}
+
+int intrcmp(void * const a, void * const b) {
+    return (*(int*)b)  - (*(int*)a); // reverse comparison
+}
+
+bool intprt(void * const element, void * format) {
+    printf(format, (*(int*)element));
+    return true;
+}
+
+void intsrt(void * const array, size_t const length, void * const compare) {
+    qsort(array, length, sizeof(int), compare);
+}
+
+int main(void) {
+    istack_s stack = create_istack(sizeof(int));
+
+    // push 10 elements
+    for(int i = 0; i < 10; i++) {
+        push_istack(&stack, &i);
+    }
+
+    // print each element from bottom to top in order
+    each_istack(&stack, intprt, "%d ");
+
+    // sort elements in reverse
+    // YOU SHOULD NOT CAST A FUNCTION POINTERS INTO VOID* 
+    // ARGUMENTS, THIS IS JUST A SILLY EXAMPLE, INSTEAD PUT 
+    // THE FUNCTION POINTER INSIDE A STRUCT AND PUT THE 
+    // INITIALIZED STRUCT POINTER ITSELF AS AN ARGUMENT
+    apply_istack(&stack, intsrt, intrcmp);
+
+    // print each element from bottom to top in reverse
+    each_istack(&stack, intprt, "%d ");
+
+    destroy_istack(&stack, intdst);
+
+    return 0;
+}
+\end{lstlisting}
 
 

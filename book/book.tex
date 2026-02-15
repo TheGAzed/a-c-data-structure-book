@@ -16,30 +16,39 @@
 \usepackage{type1cm}         
 \usepackage{hyperref}
 
+\usepackage{fontspec}
 \usepackage{xcolor}
 \usepackage{listings}
 
-\definecolor{vsblue}{RGB}{0,0,255}
-\definecolor{vsgreen}{RGB}{0,128,0}
-\definecolor{vsred}{RGB}{163,21,21}
-\definecolor{vscyan}{RGB}{43,145,175}
+\definecolor{comment}{RGB}{2, 90, 10}
+\definecolor{keyword}{RGB}{108, 48, 130}
+\definecolor{string}{RGB}{0.58, 0, 0.82}
+\definecolor{directive}{RGB}{25, 75, 150}
+
+\newfontfamily\codefont{JetBrains Mono}
 
 \lstdefinestyle{VisualStudio}{
     language=C,
-    basicstyle=\ttfamily\small,
-    keywordstyle=\color{vsblue},
-    commentstyle=\color{vsgreen},
-    stringstyle=\color{vsred},
-    directivestyle=\color{vscyan},
+    basicstyle=\codefont\small,
+    literate={*}{{{\char42}}}1,
+    columns=flexible,
+    keywordstyle=\color{keyword},
+    commentstyle=\color{comment},
+    stringstyle=\color{string},
+    emph={int,char,double,float,unsigned,void,bool, 
+    istack_s, iqueue_s, ideque_s,},
+    emphstyle={\color{directive}},
+    directivestyle=\color{directive},
     breaklines=true,
+    keepspaces=true,
     showstringspaces=false
 }
 
 \usepackage[most]{tcolorbox}
 
 \newtcolorbox{infobox}[1][]{
-  colback=gray!10!white,
-  colframe=white!25!black,
+  colback=black!10!white,
+  colframe=white!10!black,
   fonttitle=\bfseries,
   arc=0mm,
   breakable, % Allows box to break across pages
@@ -95,16 +104,20 @@ If I have to put a disclaimer I just want to clarify that the reason why some pa
 % \include{acronym}
 
 \mainmatter%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{chapter/cerpec}
+
 \include{part/one}
 \include{chapter/sequential/stack}
+\include{chapter/sequential/queue}
+\include{chapter/sequential/deque}
 
 \include{part/two}
 
-\include{appendix}
+%\include{appendix}
 
-\backmatter%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\include{glossary}
-\include{solutions}
+%\backmatter%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\include{glossary}
+%\include{solutions}
 \printindex
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

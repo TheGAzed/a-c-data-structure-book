@@ -1,0 +1,137 @@
+\chapter{The cerpec data structure library}
+
+The name \texttt{cerpec} may look familiar if you're a Polish speaker, but the word actually comes from the Eastern Slovak word for suffering. One can also see the similarities when writing the standard Slovak, Eastern Slovak, and Polish words next to each other, like this \texttt{trpieť - cerpec - cierpieć}.
+
+The reasons for choosing this name are three-fold; making this library was like suffering through psychological pain; Eastern Slovak infinitives ending with -c, standard Slovak with -ť, go nicely with the C programming language; and I doubt anyone would use this word for trademarking reasons since it's a dialectic word.
+
+\section{The main header}
+
+The \texttt{cerpec.h} serves as the parent containing all the necessary definitions shared among all the data structures. The header can be divided into four parts.
+
+\subsection{Growth factor and chunk size}
+
+The growth factor \texttt{CERPEC\_FACTOR} represents the factor by which to determine the previous and next memory size to resize into when we're either out of space or if smaller space is available. 
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:create-stack]
+#define CERPEC_FACTOR 2
+\end{lstlisting}
+
+The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size where the program might be too busy just reallocating the structures instead of performing operations \ref{fig:growth}. Basically, instead of starting at length 1 after inserting the first element, it starts at a specific power of two, in this case 256, and grows exponentially.
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:factor-chunk]
+// define chunk size to expand and contract all data structures
+#if !defined(CERPEC_CHUNK)
+#   define CERPEC_CHUNK 256
+#elif CERPEC_CHUNK <= 0
+#   error "Chunk size must be greater than zero."
+#elif (CERPEC_CHUNK & (CERPEC_CHUNK - 1))
+#   error "Chunk size must be a power of 2."
+#endif
+\end{lstlisting}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/growth}
+    \caption{Example growth if chunk size is 1 (top) vs 8 (bottom). The height of the pyramid represents the number of memory growths.}
+    \label{fig:growth}
+\end{figure}
+
+\subsection{Error and validation handling}
+
+Assertions are a simple way to check if a property is true either before or after an action has been performed. For \texttt{cerpec} there're two types of assertions - \texttt{error} and \texttt{valid}.
+
+The \texttt{error} assertion errors when something bad that shouldn't happen happens, for example - a parameter being NULL, memory allocation failing, no element being found. The \texttt{valid} assertion validates the state of the structure, for example if \texttt{length} member is less than or equal to \texttt{capacity} member, if element \texttt{size} member is greater than zero. 
+
+It's just a means to allow the user to better specify which assertions they want to check and disable. The way to disable \texttt{valid}, \texttt{error} and all assertions altogether are via defining \texttt{NVALID}, \texttt{NERROR} and \texttt{NDEBUG} either through compiler flag macro definitions or using \texttt{\#define} prior to any data structure \texttt{\#include}. I believe that in the future more assertions will be added.
+
+\break
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:assert]
+#ifdef NDEBUG
+#   define NVALID
+#   define NERROR
+#endif
+
+#ifndef NVALID
+#   define valid(condition) assert(condition)
+#else
+#   define valid(condition) (void)(0)
+#endif
+
+#ifndef NERROR
+#   define error(condition) assert(condition)
+#else
+#   define error(condition) (void)(0)
+#endif
+\end{lstlisting}
+
+\subsection{Custom memory allocator}
+
+Each structure ahs a pointer to a custom memory allocator which can be used to allocate, free and reallocate memory based on arguments. The \texttt{standard} memory allocator uses the standard library's \texttt{malloc}, \texttt{free} and \texttt{realloc} functions.
+
+\begin{infobox}[title=Linux manual page - malloc(3)]
+The \texttt{malloc()} function allocates size bytes and returns a pointer to the allocated memory.  The memory is not initialized.  If size is 0, then \texttt{malloc()} returns a unique pointer value that can later be successfully passed to \texttt{free()}.
+\end{infobox}
+
+\begin{infobox}[title=Linux manual page - free(3)]
+The \texttt{free()} function frees the memory space pointed to by p, which must have been returned by a previous call to \texttt{malloc()} or related functions.  Otherwise, or if p has already been freed, undefined behavior occurs.  If p is NULL, no operation is performed.
+\end{infobox}
+
+\begin{infobox}[title=Linux manual page - realloc(3)]
+The \texttt{realloc()} function changes the size of the memory block pointed to by p to size bytes. The contents of the memory will be unchanged in the range from the start of the region up to the minimum of the old and new sizes.  If the new size is larger than the old size, the added memory will not be initialized.
+
+If p is NULL, then the call is equivalent to \texttt{malloc(size)}, for all values of size.
+
+If size is equal to zero, and p is not NULL, then the call is equivalent to \texttt{free(p)}.
+
+Unless p is NULL, it must have been returned by an earlier call to malloc or related functions.  If the area pointed to was moved, a free(p) is done.
+\end{infobox}
+
+The only way to use custom memory is through defining three custom function pointers and putting them as parameters for the \texttt{compose\_memory} builder:
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:allocator]
+typedef void * (*alloc_fn)   (size_t const, void *);
+typedef void * (*realloc_fn) (void *, size_t const, void *);
+typedef void   (*free_fn)    (void *, void *);
+
+typedef struct memory {
+    void * arguments;
+    alloc_fn alloc;
+    realloc_fn realloc;
+    free_fn free;
+} memory_s;
+
+memory_s compose_memory(alloc_fn const alloc, realloc_fn const realloc, free_fn const free, void * const arguments);
+\end{lstlisting}
+
+The standard memory allocations can be accessed through the constant external variable \texttt{standard}.
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:standard]
+extern const memory_s standard;
+\end{lstlisting}
+
+\subsection{Function pointers}
+
+This is a list of all available function pointers which allow for more generic data manipulation.
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:allocator]
+typedef void   (*set_fn)     (void * const element);
+typedef void * (*copy_fn)    (void * const destination, void const * const source);
+typedef size_t (*hash_fn)    (void const * const element);
+typedef int    (*compare_fn) (void const * const a, void const * const b);
+typedef bool   (*filter_fn)  (void const * const element);
+typedef bool   (*handle_fn)  (void * const element, void * const arguments);
+typedef void   (*process_fn) (void * const array, size_t const lenght, void * const arguments);
+typedef void   (*operate_fn) (void * const result, void const * const a, void const * const b);
+\end{lstlisting}
+
+\begin{enumerate}
+    \item \texttt{set\_fn} - a function pointer that allows to manipulate a generic element pointer directly, can be used to set the specified element to zero, deallocate memory, increment and decrement value.
+    \item \texttt{copy\_fn} - a function pointer which allows to create with all nested sub-elements recreated deeply or referenced shallowly from a source element reference into a destination one.
+    \item \texttt{hash\_fn} - a function pointer which takes in a generic element and returns a \texttt{size\_t} value representing a hash. This hash can be used to index the value into an array.
+    \item \texttt{compare\_fn} - a function pointer that compares elements \texttt{a} and \texttt{b}, and returns 0 if equal, negative number if \texttt{a} is smaller, and positive otherwise.
+    \item \texttt{filter\_fn} - a function pointer that returns \texttt{true} if the specified element meets a certain criteria, \texttt{false} otherwise. Can be used to extract element in linear list structures, for example odd/even numbers or primes.
+    \item \texttt{handle\_fn} - a function pointer that can handle a single element based on arguments. This function allows to iteratively chang elements until \texttt{false} is returned (kinda like a \texttt{break} in a classic c loop.).
+    \item \texttt{process\_fn} - a function pointer that allows to process an array of elements instead of iteratively walking through each one. Can be used to sort a sequence of element in array form for linear data structures like stacks, queues and lists.
+    \item \texttt{operate\_fn} - a function pointer that performs an operation on two elements and saves the result inside the first \texttt{result} parameter. The only usage is in the \(F(n) = G(n) + H(n)\) calculation for the A* path finding algorithm (\(F(n)\) being \texttt{result} and the rest being the other two parameters).
+\end{enumerate}
