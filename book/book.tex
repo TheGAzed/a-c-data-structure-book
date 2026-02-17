@@ -19,13 +19,14 @@
 \usepackage{fontspec}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage[figuresleft]{rotating}
 
 \definecolor{comment}{RGB}{2, 90, 10}
-\definecolor{keyword}{RGB}{108, 48, 130}
-\definecolor{string}{RGB}{0.58, 0, 0.82}
-\definecolor{directive}{RGB}{25, 75, 150}
+\definecolor{keyword}{RGB}{140, 58, 140}
+\definecolor{string}{RGB}{98, 41, 2}
+\definecolor{directive}{RGB}{45, 75, 150}
 
-\newfontfamily\codefont{JetBrains Mono}
+\newfontfamily\codefont{JetBrains Mono}[Scale=0.9]
 
 \lstdefinestyle{VisualStudio}{
     language=C,
@@ -41,7 +42,10 @@
     directivestyle=\color{directive},
     breaklines=true,
     keepspaces=true,
-    showstringspaces=false
+    showstringspaces=false,
+    frame=lines,
+    framesep=5pt,
+    framerule=0.4pt,
 }
 
 \usepackage[most]{tcolorbox}
@@ -123,7 +127,6 @@ If I have to put a disclaimer I just want to clarify that the reason why some pa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
-
 
 
 

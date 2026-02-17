@@ -12,13 +12,20 @@ The \texttt{cerpec.h} serves as the parent containing all the necessary definiti
 
 The growth factor \texttt{CERPEC\_FACTOR} represents the factor by which to determine the previous and next memory size to resize into when we're either out of space or if smaller space is available. 
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:create-stack]
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:create-stack, title=include/cerpec.h]
 #define CERPEC_FACTOR 2
 \end{lstlisting}
 
-The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size where the program might be too busy just reallocating the structures instead of performing operations \ref{fig:growth}. Basically, instead of starting at length 1 after inserting the first element, it starts at a specific power of two, in this case 256, and grows exponentially.
+The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size where the program might be too busy just reallocating the structures instead of performing operations, like in \autoref{fig:growth}. Basically, instead of starting at length 1 after inserting the first element, it starts at a specific power of two, in this case 256, and grows exponentially (see \autoref{lst:factor-chunk}).
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:factor-chunk]
+\begin{figure}
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/growth}
+    \caption{Example growth if chunk size is 1 (top) vs 8 (bottom). The height of the pyramid represents the number of memory growths.}
+    \label{fig:growth}
+\end{figure}
+
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:factor-chunk, title=include/cerpec.h]
 // define chunk size to expand and contract all data structures
 #if !defined(CERPEC_CHUNK)
 #   define CERPEC_CHUNK 256
@@ -29,24 +36,15 @@ The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size whe
 #endif
 \end{lstlisting}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=1.0\textwidth]{figures/growth}
-    \caption{Example growth if chunk size is 1 (top) vs 8 (bottom). The height of the pyramid represents the number of memory growths.}
-    \label{fig:growth}
-\end{figure}
-
 \subsection{Error and validation handling}
 
-Assertions are a simple way to check if a property is true either before or after an action has been performed. For \texttt{cerpec} there're two types of assertions - \texttt{error} and \texttt{valid}.
+Assertions are a simple way to check if a property is true either before or after an action has been performed. For \texttt{cerpec} there're two types of assertions - \texttt{error} and \texttt{valid} (see \autoref{lst:assert}).
 
 The \texttt{error} assertion errors when something bad that shouldn't happen happens, for example - a parameter being NULL, memory allocation failing, no element being found. The \texttt{valid} assertion validates the state of the structure, for example if \texttt{length} member is less than or equal to \texttt{capacity} member, if element \texttt{size} member is greater than zero. 
 
 It's just a means to allow the user to better specify which assertions they want to check and disable. The way to disable \texttt{valid}, \texttt{error} and all assertions altogether are via defining \texttt{NVALID}, \texttt{NERROR} and \texttt{NDEBUG} either through compiler flag macro definitions or using \texttt{\#define} prior to any data structure \texttt{\#include}. I believe that in the future more assertions will be added.
 
-\break
-
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:assert]
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:assert, title=include/cerpec.h]
 #ifdef NDEBUG
 #   define NVALID
 #   define NERROR
@@ -87,9 +85,9 @@ If size is equal to zero, and p is not NULL, then the call is equivalent to \tex
 Unless p is NULL, it must have been returned by an earlier call to malloc or related functions.  If the area pointed to was moved, a free(p) is done.
 \end{infobox}
 
-The only way to use custom memory is through defining three custom function pointers and putting them as parameters for the \texttt{compose\_memory} builder:
+The only way to use custom memory is through defining three custom function pointers and putting them as parameters for the \texttt{compose\_memory} builder, as is the case in \autoref{lst:allocator}.
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:allocator]
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:allocator, title=include/cerpec.h]
 typedef void * (*alloc_fn)   (size_t const, void *);
 typedef void * (*realloc_fn) (void *, size_t const, void *);
 typedef void   (*free_fn)    (void *, void *);
@@ -106,15 +104,15 @@ memory_s compose_memory(alloc_fn const alloc, realloc_fn const realloc, free_fn 
 
 The standard memory allocations can be accessed through the constant external variable \texttt{standard}.
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:standard]
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:standard, title=include/cerpec.h]
 extern const memory_s standard;
 \end{lstlisting}
 
 \subsection{Function pointers}
 
-This is a list of all available function pointers which allow for more generic data manipulation.
+\autoref{lst:function-pointers} is a code snippet list of all available function pointers which allow for more generic user-defined data manipulation.
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:allocator]
+\begin{lstlisting}[language=C, style=VisualStudio, label=lst:function-pointers, title=include/cerpec.h]
 typedef void   (*set_fn)     (void * const element);
 typedef void * (*copy_fn)    (void * const destination, void const * const source);
 typedef size_t (*hash_fn)    (void const * const element);
@@ -125,6 +123,7 @@ typedef void   (*process_fn) (void * const array, size_t const lenght, void * co
 typedef void   (*operate_fn) (void * const result, void const * const a, void const * const b);
 \end{lstlisting}
 
+The explanation for each of the function pointers is as follows:
 \begin{enumerate}
     \item \texttt{set\_fn} - a function pointer that allows to manipulate a generic element pointer directly, can be used to set the specified element to zero, deallocate memory, increment and decrement value.
     \item \texttt{copy\_fn} - a function pointer which allows to create with all nested sub-elements recreated deeply or referenced shallowly from a source element reference into a destination one.
@@ -135,3 +134,15 @@ typedef void   (*operate_fn) (void * const result, void const * const a, void co
     \item \texttt{process\_fn} - a function pointer that allows to process an array of elements instead of iteratively walking through each one. Can be used to sort a sequence of element in array form for linear data structures like stacks, queues and lists.
     \item \texttt{operate\_fn} - a function pointer that performs an operation on two elements and saves the result inside the first \texttt{result} parameter. The only usage is in the \(F(n) = G(n) + H(n)\) calculation for the A* path finding algorithm (\(F(n)\) being \texttt{result} and the rest being the other two parameters).
 \end{enumerate}
+
+\section{Implementation philosophies}
+
+I made up these following mantras used by the data structures:
+
+\begin{itemize}
+    \item Snake case.
+    \item Public header functions end with the structure name, private source ones begin with an underscore and name, like this public: \texttt{push\_istack}, private: \texttt{\_istack\_resize}.
+    \item \texttt{char *} elements - All contained element arrays must be pointers to characters. The reason is simple, the \texttt{sizeof} operator returns the number of \texttt{char} elements a type can hold. This is important for traversing the array, getting to an element uses this formula: \(element = elements\_array + (index\_of\_element * size\_of\_element)\).
+    \item East const - The code uses East const style for better readability. Since I decided to change from West const to East const while being mostly done with the library there might be some West const left. Here's West const - \texttt{const int}, \texttt{const int * const}; and here East const - \texttt{int const}, \texttt{int const * const}.
+    \item Index-relativity - Technically every array; like \texttt{element}, \texttt{next}, \texttt{prev} in lists; can be either written inside a node struct or divided into arrays where the node itself becomes an array index. Classic nodes are just indexes in the array of available memory, meanwhile dividing node members into individual arrays makes the array index relative to a data structure. Basically, instead of having a doubly linked list with a node struct member with \texttt{element}, \texttt{next} and \texttt{prev} members, we have just the list structure, then an \texttt{elements} array, \texttt{nexts} array and \texttt{prevs} array members.
+\end{itemize}

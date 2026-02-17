@@ -1,1 +1,14 @@
-\chapter{Queue}
+\chapter{Queue} \label{ch:queue}
+
+Imagine you're waiting for your daily calory intake, lunch, in the school and you see a queue. When one person gets their lunch the entire queue moves one person to the front, because, logically, the entire cafeteria won't move to the next person.
+
+But that's NOT how queues in programming work. If each person is a single element and the cafeteria is at the current place of the first person in the queue, then you don't want to move each element to the cafeteria, but move the cafeteria itself. So we have a current pointer/index/position which, after getting rid of the first element, we go/increment/move to the second one, and so on.
+
+Going back to \autoref{ch:stack} \nameref{ch:stack}'s chess analogy, when we put those moves into the stack we're kind of pulling them from an array of moves from the front tto the back. Now lets say there're move moves going on, plus we want to play back and forth the moves which were already played without waiting for the game to finish. To solve this we can pipe the moves into a special queue, then push elements from the queue into stack one. If we want to go to the beginning, then we push the moves from the stack one into stack two. To play all the way to the latest move, all that's left is to first push all the elements from stack two into stack one, and push all moves from the queue into stack one. The top element in stack is the latest move, see \autoref{fig:chess-queue-stack}.
+
+\begin{figure}[p]
+    \centering
+    \refstepcounter{figure}\label{fig:chess-queue-stack}
+    \includegraphics[angle=90, height=0.9\textheight]{figures/stack/chess-queue-stack}
+    \caption{Visual example of two stacks and a queue being used to track the chess game.}
+\end{figure}
