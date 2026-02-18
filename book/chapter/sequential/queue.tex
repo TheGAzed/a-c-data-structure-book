@@ -8,7 +8,38 @@ Going back to \autoref{ch:stack} \nameref{ch:stack}'s chess analogy, when we put
 
 \begin{figure}[p]
     \centering
-    \refstepcounter{figure}\label{fig:chess-queue-stack}
-    \includegraphics[angle=90, height=0.9\textheight]{figures/stack/chess-queue-stack}
+    \includegraphics[angle=90, height=0.965\textheight]{figures/queue/chess-queue-stack}
     \caption{Visual example of two stacks and a queue being used to track the chess game.}
+    \label{fig:chess-queue-stack}
+\end{figure}
+
+\section{Implementations of a queue}
+
+Similarly to stacks, there are also two ways to implement queues:
+
+\begin{itemize}
+    \item Singly linked lists
+    \item Static arrays (not dynamic)
+\end{itemize}
+
+\subsection{The free linked list}
+
+Usually when implementing a queue using linked lists we create a list structure that ahs one reference to the head, for access and removal; and to the tail node, for pushing elements. 
+
+However, there is also a slightly better way to implement them, which is to use circular lists. The next subsection will talk about circular arrays, but we can also use circular lists, kinda like \autoref{fig:circular-list}. Hear me out, this won't work if we only have a reference to the head, so lets go with the next best thing - the tail. The list will be circular, thus the tail's next node will be the head. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/queue/circular-list}
+    \caption{Visual representation of a circular singly linked list.}
+    \label{fig:circular-list}
+\end{figure}
+
+This makes access and removal as simple as getting the the head from the tail, also adding elements is easy since we just make the new node's next reference the head and change tail's next to new node, see \autoref{fig:list-queue}. The downside is that circular linked lists are more complex than standard, but by just having one, the tail, node pointer we can decrease the size of the structure a bit (or a whopping 32/64 bits at that).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/queue/list-queue}
+    \caption{Example of adding (top) and removing (bottom) an element from a circular singly linked list queue.}
+    \label{fig:list-queue}
 \end{figure}
