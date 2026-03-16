@@ -1,12 +1,14 @@
 \chapter{The cerpec data structure library}
 
-The name \texttt{cerpec} may look familiar if you're a Polish speaker, but the word actually comes from the Eastern Slovak word for suffering. One can also see the similarities when writing the standard Slovak, Eastern Slovak, and Polish words next to each other, like this \texttt{trpieť - cerpec - cierpieć}.
+The name \texttt{cerpec} may look familiar if you're a Polish speaker, but the word actually comes from the Eastern Slovak word for suffering. One can also hear the similarities when writing and reading the standard Slovak, Eastern Slovak, and Polish words next to each other, like this \texttt{trpieť - cerpec - cierpieć}.
 
-The reasons for choosing this name are three-fold; making this library was like suffering through psychological pain; Eastern Slovak infinitives ending with -c, standard Slovak with -ť, go nicely with the C programming language; and I doubt anyone would use this word for trademarking reasons since it's a dialectic word.
+The reasons for choosing this name are three-fold; making this library was like suffering through psychological pain; Eastern Slovak infinitives ending with -c (standard Slovak with -ť) go nicely with the \texttt{C} in the C programming language; and lastly,I doubt anyone would use this word for trademarking reasons since it's a dialectic word.
 
 \section{The main header}
 
 The \texttt{cerpec.h} serves as the parent containing all the necessary definitions shared among all the data structures. The header can be divided into four parts.
+
+\nocite{kernighan1988c}
 
 \subsection{Growth factor and chunk size}
 
@@ -16,7 +18,7 @@ The growth factor \texttt{CERPEC\_FACTOR} represents the factor by which to dete
 #define CERPEC_FACTOR 2
 \end{lstlisting}
 
-The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size where the program might be too busy just reallocating the structures instead of performing operations, like in \autoref{fig:growth}. Basically, instead of starting at length 1 after inserting the first element, it starts at a specific power of two, in this case 256, and grows exponentially (see \autoref{lst:factor-chunk}).
+The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size where the program might be too busy just reallocating the structures instead of performing operations, graphically exemplified in \autoref{fig:growth}. Basically, instead of starting at length 1 after inserting the first element, it starts at a specific power of two, in the case of this project - 256, and grows exponentially as in \autoref{lst:factor-chunk}.
 
 \begin{figure}
     \centering
@@ -37,10 +39,11 @@ The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size whe
 \end{lstlisting}
 
 \subsection{Error and validation handling}
+\nocite{lewboskiAssert}
 
-Assertions are a simple way to check if a property is true either before or after an action has been performed. For \texttt{cerpec} there're two types of assertions - \texttt{error} and \texttt{valid} (see \autoref{lst:assert}).
+Assertions are a simple way to check if certain properties are true either before or after an action has been performed. For \texttt{cerpec} there're two types of assertions - \texttt{error} and \texttt{valid} (see \autoref{lst:assert}).
 
-The \texttt{error} assertion errors when something bad that shouldn't happen happens, for example - a parameter being NULL, memory allocation failing, no element being found. The \texttt{valid} assertion validates the state of the structure, for example if \texttt{length} member is less than or equal to \texttt{capacity} member, if element \texttt{size} member is greater than zero. 
+The \texttt{error} assertion errors when something bad that shouldn't happen happens, common examples include - a parameter being NULL, memory allocation failing, no element being found. The \texttt{valid} assertion validates the state of the structure, for example if \texttt{length} member is less than or equal to \texttt{capacity} member, if element \texttt{size} member is greater than zero. \texttt{valid} assertions are just less important conditions that should be disabled in production for better performance.
 
 It's just a means to allow the user to better specify which assertions they want to check and disable. The way to disable \texttt{valid}, \texttt{error} and all assertions altogether are via defining \texttt{NVALID}, \texttt{NERROR} and \texttt{NDEBUG} either through compiler flag macro definitions or using \texttt{\#define} prior to any data structure \texttt{\#include}. I believe that in the future more assertions will be added.
 
@@ -65,7 +68,9 @@ It's just a means to allow the user to better specify which assertions they want
 
 \subsection{Custom memory allocator}
 
-Each structure ahs a pointer to a custom memory allocator which can be used to allocate, free and reallocate memory based on arguments. The \texttt{standard} memory allocator uses the standard library's \texttt{malloc}, \texttt{free} and \texttt{realloc} functions.
+\nocite{linuxManPage}
+
+Each structure has a pointer to a custom memory allocator which can be used to allocate, free and reallocate memory based on arguments. The \texttt{standard} memory allocator is a constant external variable that uses the standard library's \texttt{malloc}, \texttt{free} and \texttt{realloc} functions in the \texttt{create\_} data structure functions.
 
 \begin{infobox}[title=Linux manual page - malloc(3)]
 The \texttt{malloc()} function allocates size bytes and returns a pointer to the allocated memory.  The memory is not initialized.  If size is 0, then \texttt{malloc()} returns a unique pointer value that can later be successfully passed to \texttt{free()}.
@@ -85,7 +90,7 @@ If size is equal to zero, and p is not NULL, then the call is equivalent to \tex
 Unless p is NULL, it must have been returned by an earlier call to malloc or related functions.  If the area pointed to was moved, a free(p) is done.
 \end{infobox}
 
-The only way to use custom memory is through defining three custom function pointers and putting them as parameters for the \texttt{compose\_memory} builder, as is the case in \autoref{lst:allocator}.
+The only way to use custom memory is through defining three custom function pointers and putting them as parameters for the \texttt{compose\_memory} builder, as is the case in \autoref{lst:allocator}. Each data structure has a function starting with \texttt{make\_} which allows more customization. Right now it only allows to add a custom allocator, but in the future it might allow more parameters for customization.
 
 \begin{lstlisting}[language=C, style=VisualStudio, label=lst:allocator, title=include/cerpec.h]
 typedef void * (*alloc_fn)   (size_t const, void *);
@@ -110,7 +115,7 @@ extern const memory_s standard;
 
 \subsection{Function pointers}
 
-\autoref{lst:function-pointers} is a code snippet list of all available function pointers which allow for more generic user-defined data manipulation.
+\autoref{lst:function-pointers} is a code snippet list of all available function pointers which allow for more generic and user-defined data manipulation.
 
 \begin{lstlisting}[language=C, style=VisualStudio, label=lst:function-pointers, title=include/cerpec.h]
 typedef void   (*set_fn)     (void * const element);
@@ -125,17 +130,21 @@ typedef void   (*operate_fn) (void * const result, void const * const a, void co
 
 The explanation for each of the function pointers is as follows:
 \begin{enumerate}
-    \item \texttt{set\_fn} - a function pointer that allows to manipulate a generic element pointer directly, can be used to set the specified element to zero, deallocate memory, increment and decrement value.
-    \item \texttt{copy\_fn} - a function pointer which allows to create with all nested sub-elements recreated deeply or referenced shallowly from a source element reference into a destination one.
-    \item \texttt{hash\_fn} - a function pointer which takes in a generic element and returns a \texttt{size\_t} value representing a hash. This hash can be used to index the value into an array.
-    \item \texttt{compare\_fn} - a function pointer that compares elements \texttt{a} and \texttt{b}, and returns 0 if equal, negative number if \texttt{a} is smaller, and positive otherwise.
-    \item \texttt{filter\_fn} - a function pointer that returns \texttt{true} if the specified element meets a certain criteria, \texttt{false} otherwise. Can be used to extract element in linear list structures, for example odd/even numbers or primes.
-    \item \texttt{handle\_fn} - a function pointer that can handle a single element based on arguments. This function allows to iteratively chang elements until \texttt{false} is returned (kinda like a \texttt{break} in a classic c loop.).
-    \item \texttt{process\_fn} - a function pointer that allows to process an array of elements instead of iteratively walking through each one. Can be used to sort a sequence of element in array form for linear data structures like stacks, queues and lists.
+    \item \texttt{set\_fn} - a function pointer that allows to manipulate a generic element pointer directly, can be used to set the specified element to zero, deallocate memory, increment and decrement values, etc.
+    \item \texttt{copy\_fn} - a function pointer to create a copy of a specific element. It is possible to also copy all nested sub-elements either deeply or referenced shallowly, starting from a source element reference into a destination one.
+    \item \texttt{hash\_fn} - a function pointer which takes in a generic element and returns a \texttt{size\_t} value representing a hash. This hash can be used to index the value into a hash array.
+    \item \texttt{compare\_fn} - a function pointer that compares elements \texttt{a} and \texttt{b}, and returns 0 if equal, negative if \texttt{a} is smaller, and positive otherwise.
+    \item \texttt{filter\_fn} - a function pointer that returns \texttt{true} if the specified element meets a certain criteria, \texttt{false} otherwise. Can be used to extract element in linear list structures, for example odd/even numbers, prime numbers, but also whitespace, alphanumeric characters.
+    \item \texttt{handle\_fn} - a function pointer that can handle a single element based on arguments. This function allows to iteratively change elements until \texttt{false} is returned (kinda like a \texttt{break} in a classic c loop.). The closest thing to this would be a \texttt{foreach} loop body.
+    \item \texttt{process\_fn} - a function pointer that allows to process an array of elements instead of iteratively walking through each one. Can be used to sort a sequence of element in array form for linear data structures like stacks, queues, deques and lists.
     \item \texttt{operate\_fn} - a function pointer that performs an operation on two elements and saves the result inside the first \texttt{result} parameter. The only usage is in the \(F(n) = G(n) + H(n)\) calculation for the A* path finding algorithm (\(F(n)\) being \texttt{result} and the rest being the other two parameters).
 \end{enumerate}
 
 \section{Implementation philosophies}
+
+This section simply contains my personal preferences and opinions about certain design and code structure choices. I hereby give you permission to disagree with everything written here.
+
+\subsection{Mantras}
 
 I made up these following mantras used by the data structures:
 
@@ -143,6 +152,27 @@ I made up these following mantras used by the data structures:
     \item Snake case.
     \item Public header functions end with the structure name, private source ones begin with an underscore and name, like this public: \texttt{push\_istack}, private: \texttt{\_istack\_resize}.
     \item \texttt{char *} elements - All contained element arrays must be pointers to characters. The reason is simple, the \texttt{sizeof} operator returns the number of \texttt{char} elements a type can hold. This is important for traversing the array, getting to an element uses this formula: \(element = elements\_array + (index\_of\_element * size\_of\_element)\).
-    \item East const - The code uses East const style for better readability. Since I decided to change from West const to East const while being mostly done with the library there might be some West const left. Here's West const - \texttt{const int}, \texttt{const int * const}; and here East const - \texttt{int const}, \texttt{int const * const}.
-    \item Index-relativity - Technically every array; like \texttt{element}, \texttt{next}, \texttt{prev} in lists; can be either written inside a node struct or divided into arrays where the node itself becomes an array index. Classic nodes are just indexes in the array of available memory, meanwhile dividing node members into individual arrays makes the array index relative to a data structure. Basically, instead of having a doubly linked list with a node struct member with \texttt{element}, \texttt{next} and \texttt{prev} members, we have just the list structure, then an \texttt{elements} array, \texttt{nexts} array and \texttt{prevs} array members.
+    \item East const - The code uses east const style for better readability. Since I decided to change from West const to east const while being mostly done with the library there might be some West const left. Here's west const for constant integer and constant pointer to constant integer - \texttt{const int}, \texttt{const int * const}; and east const - \texttt{int const}, \texttt{int const * const}.
+    \item Index-relativity - Technically every array, like \texttt{element}, \texttt{next}, \texttt{prev} in lists, can be either written inside a node struct or divided into arrays where the node itself becomes an array index. Classic nodes are just indexes in the array of available memory, meanwhile dividing node members into individual arrays makes the array index relative to its data structure. Simply said, instead of having a doubly linked list with a node struct member with \texttt{element}, \texttt{next} and \texttt{prev} members, we have just the list structure with an \texttt{elements} array, \texttt{nexts} array, and \texttt{prevs} array member.
 \end{itemize}
+
+\subsection{How others did it}
+
+\subsubsection{C++}
+
+\nocite{cplusplusReference}
+
+The C++ programming language and its standard data structures have been a great source of inspiration for this project. Many structures follow the same design and implementations as the C++ standard library. Every time I wasn't sure how to implement something I looked up how C++ did it and adapted it to C. With that said, there were some gaps.
+
+\subsection{Python}
+
+From python I took the idea of set operations. I decided to implement them just like Monty Python intended. Jokes aside, I find the python set operations way more human than what C++ offers.
+
+\subsection{Haskell}
+
+\nocite{nriPreludeList}
+
+Haskell is probably the most quintessential programming language for my library. Using function pointers as parameters is the thing that defines this project and without Haskell's higher order functions serving as inspiration I wouldn't be able to make it for real. Haskell lists also played a significant role of inspiration. Hence the many operations one can perform on them in \texttt{cerpec}. 
+
+\bibliographystyle{plain}
+\bibliography{references/cerpec}
