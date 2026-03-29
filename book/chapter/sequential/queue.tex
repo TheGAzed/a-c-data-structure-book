@@ -1,10 +1,10 @@
 \chapter{Queue} \label{ch:queue}
 
-Imagine you're waiting for your daily calory intake, lunch, in the school and you see a queue. When one person gets their lunch the entire queue moves one person to the front, because, logically, the entire cafeteria won't move to the next person.
+Imagine you're waiting for your daily calorie intake, i.e. lunch, in the school and you see a queue. When one person gets their lunch the entire queue moves one person to the front, because, logically, the entire cafeteria won't move to the next person.
 
-But that's NOT how queues in programming work. If each person is a single element and the cafeteria is at the current place of the first person in the queue, then you don't want to move each element to the cafeteria, but move the cafeteria itself. So we have a current pointer/index/position which, after getting rid of the first element, we go/increment/move to the second one, and so on.
+But that's not how queues in programming work, I mean, technically they can. If each person is a single element and the cafeteria is at the current place of the first person in the queue, then you don't want to move each element to the cafeteria, but move the cafeteria itself. So we have a current pointer/index/position which, after getting rid of the first element, we go/increment/move to the second one, and so on.
 
-Going back to \autoref{ch:stack} \nameref{ch:stack}'s chess analogy, when we put those moves into the stack we're kind of pulling them from an array of moves from the front tto the back. Now lets say there're move moves going on, plus we want to play back and forth the moves which were already played without waiting for the game to finish. To solve this we can pipe the moves into a special queue, then push elements from the queue into stack one. If we want to go to the beginning, then we push the moves from the stack one into stack two. To play all the way to the latest move, all that's left is to first push all the elements from stack two into stack one, and push all moves from the queue into stack one. The top element in stack is the latest move, see \autoref{fig:chess-queue-stack}.
+Going back to \autoref{ch:stack} \nameref{ch:stack}'s chess analogy, when we put those moves into the stack we're kind of pulling them from an array of moves starting at the front and then back. Now lets say there're move moves still happening, plus we want to play back and forth the moves which were already played without waiting for the game to finish. To solve this we can pipe the moves into a special queue, then push elements from the queue into stack number one. If we want to go to the beginning, then we push the moves from the stack number one into number two. To play all the way to the latest move, all that's left is to first push all the elements from stack two into stack one, and push all moves from the queue into stack one. The top element in stack is the latest move, see \autoref{fig:chess-queue-stack}.
 
 \begin{figure}[p]
     \centering
@@ -24,9 +24,9 @@ Similarly to stacks, there are also two ways to implement queues:
 
 \subsection{The free linked list}
 
-Usually when implementing a queue using linked lists we create a list structure that ahs one reference to the head, for access and removal; and to the tail node, for pushing elements. 
+Usually when implementing a queue using linked lists we create a list structure that has one reference to the head - for access and removal, and to the tail node - for pushing elements. 
 
-However, there is also a slightly better way to implement them, which is to use circular lists. The next subsection will talk about circular arrays, but we can also use circular lists, kinda like \autoref{fig:circular-list}. Hear me out, this won't work if we only have a reference to the head, so lets go with the next best thing - the tail. The list will be circular, thus the tail's next node will be the head. 
+However, there is also a slightly better way to implement them, which is to use circular lists. The next subsection talks about circular arrays, but we can also use circular lists, kinda like in \autoref{fig:circular-list}. Hear me out, this won't work if we only have a reference to the head, so lets go with the next best thing - the tail. Since the list is circular, tail's next node will therefore be the head, or front node.
 
 \begin{figure}
     \centering
@@ -35,11 +35,24 @@ However, there is also a slightly better way to implement them, which is to use 
     \label{fig:circular-list}
 \end{figure}
 
-This makes access and removal as simple as getting the the head from the tail, also adding elements is easy since we just make the new node's next reference the head and change tail's next to new node, see \autoref{fig:list-queue}. The downside is that circular linked lists are more complex than standard, but by just having one, the tail, node pointer we can decrease the size of the structure a bit (or a whopping 32/64 bits at that).
+This makes access and removal as simple as getting the head from the tail, also adding elements is easy since we just make the new node's next reference the head and change tail's next to new node, see \autoref{fig:list-queue}. The downside is that circular linked lists are more complex than the classical list implementation, but by just having one tail node pointer we can decrease the size of the structure by quite a bit (or a whopping 32/64 bits at that).
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/queue/list-queue}
     \caption{Example of adding (top) and removing (bottom) an element from a circular singly linked list queue.}
     \label{fig:list-queue}
+\end{figure}
+
+\subsection{The confined array}
+
+Another way to implement a queue is to use a static array. We can use dynamic arrays as well, but when the queue needs to expand the elements must be copied front to back into a new array. This sounds reasonable for array resizing, but usually when arrays resize they don't always need to copy all the elements and just either don't do anything or they just inform that the memory length was changed. This is the case for \autoref{ch:stack}'s stacks, but in the case of queue a copy needs to happen all the time to move the elements to the beginning of the array, which is a huge performance hit. But what if we add the simplicity of a static array queue with the expandability of tail-based circular linked lists?
+
+\subsection{Tail-based circular linked list of arrays}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/queue/list-array}
+    \caption{Graphical example of tail-based circular linked list of arrays. The front/fore element is the first element (index one) in the head node's array, and the back element is the last element (index six) in the tail node's array.}
+    \label{fig:queue-list-array}
 \end{figure}

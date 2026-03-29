@@ -74,7 +74,7 @@ The biggest concern is that arrays aren't infinite and if we want to add an arbi
 
 \subsection{Singly linked list of array elements}
 
-Combine the best of humbleness with pride and you get this. It's just a linked list, see \autoref{fig:list-array}, but the node is actually made up of an array of elements instead of just a singleton. A mathematical person may say that the previous implementations are but a simple subset of this superset of a stack structure, but i digress. 
+Combine the best of humbleness with pride and you get this. It's just a linked list, see \autoref{fig:stack-list-array}, but the node is actually made up of an array of elements instead of just a singleton. A mathematical person may say that the previous implementations are but a simple subset of this superset of a stack structure, but i digress. 
 
 The main benefit is that the list-array works like a array when accessing elements; and like a list when shortening/expanding it (we don't need to resize an array, only add a new node to the top). Adding and removing elements just combines the array method until full/empty, where it then performs the list operations. The implementation is more like a compromise than the best of both worlds.
 
@@ -84,9 +84,8 @@ To get the top element we can store the total element count as LENGTH, then simp
     \centering
     \includegraphics[width=0.7\textwidth]{figures/stack/list-array}
     \caption{Graphical example of singly linked list of arrays. The top element is the last element in the head node's array.}
-    \label{fig:list-array}
+    \label{fig:stack-list-array}
 \end{figure}
-
 
 \section{Array stack structure code}
 
