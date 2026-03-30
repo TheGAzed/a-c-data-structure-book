@@ -14,7 +14,7 @@ The \texttt{cerpec.h} serves as the parent containing all the necessary definiti
 
 The growth factor \texttt{CERPEC\_FACTOR} represents the factor by which to determine the previous and next memory size to resize into when we're either out of space or if smaller space is available. 
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:create-stack, title=include/cerpec.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-stack, title=include/cerpec.h]
 #define CERPEC_FACTOR 2
 \end{lstlisting}
 
@@ -27,7 +27,7 @@ The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size whe
     \label{fig:growth}
 \end{figure}
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:factor-chunk, title=include/cerpec.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:factor-chunk, title=include/cerpec.h]
 // define chunk size to expand and contract all data structures
 #if !defined(CERPEC_CHUNK)
 #   define CERPEC_CHUNK 256
@@ -47,7 +47,7 @@ The \texttt{error} assertion errors when something bad that shouldn't happen hap
 
 It's just a means to allow the user to better specify which assertions they want to check and disable. The way to disable \texttt{valid}, \texttt{error} and all assertions altogether are via defining \texttt{NVALID}, \texttt{NERROR} and \texttt{NDEBUG} either through compiler flag macro definitions or using \texttt{\#define} prior to any data structure \texttt{\#include}. I believe that in the future more assertions will be added.
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:assert, title=include/cerpec.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:assert, title=include/cerpec.h]
 #ifdef NDEBUG
 #   define NVALID
 #   define NERROR
@@ -92,7 +92,7 @@ Unless p is NULL, it must have been returned by an earlier call to malloc or rel
 
 The only way to use custom memory is through defining three custom function pointers and putting them as parameters for the \texttt{compose\_memory} builder, as is the case in \autoref{lst:allocator}. Each data structure has a function starting with \texttt{make\_} which allows more customization. Right now it only allows to add a custom allocator, but in the future it might allow more parameters for customization.
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:allocator, title=include/cerpec.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:allocator, title=include/cerpec.h]
 typedef void * (*alloc_fn)   (size_t const, void *);
 typedef void * (*realloc_fn) (void *, size_t const, void *);
 typedef void   (*free_fn)    (void *, void *);
@@ -109,7 +109,7 @@ memory_s compose_memory(alloc_fn const alloc, realloc_fn const realloc, free_fn 
 
 The standard memory allocations can be accessed through the constant external variable \texttt{standard}.
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:standard, title=include/cerpec.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:standard, title=include/cerpec.h]
 extern const memory_s standard;
 \end{lstlisting}
 
@@ -117,7 +117,7 @@ extern const memory_s standard;
 
 \autoref{lst:function-pointers} is a code snippet list of all available function pointers which allow for more generic and user-defined data manipulation.
 
-\begin{lstlisting}[language=C, style=VisualStudio, label=lst:function-pointers, title=include/cerpec.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:function-pointers, title=include/cerpec.h]
 typedef void   (*set_fn)     (void * const element);
 typedef void * (*copy_fn)    (void * const destination, void const * const source);
 typedef size_t (*hash_fn)    (void const * const element);
