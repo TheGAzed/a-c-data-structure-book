@@ -1,10 +1,10 @@
 \chapter{Queue} \label{ch:queue}
 
-Imagine you're waiting for your daily calorie intake, i.e. lunch, in the school and you see a queue. When one person gets their lunch the entire queue moves one person to the front, because logically, the entire cafeteria won't move to the next person.
+Imagine you're waiting for your daily calorie intake, i.e. lunch, in school and you see a queue. When one person gets their lunch the entire queue moves one person to the front, because logically, the entire cafeteria won't move to the next person.
 
-But that's not how queues in programming work, I mean, technically they can, but... If each person is a single element and the cafeteria is at the current place of the first person in the queue, then you don't want to move each element to the cafeteria, but move the cafeteria itself. So we have a current pointer/index/position which, after getting rid of the first element, we go/increment/move to the second one, and so on.
+But that's not how queues in programming work, I mean, technically they can, but//... If each person is a single element and the cafeteria is at the current place of the first person in the queue, then you don't want to move each element to the cafeteria, but move the cafeteria itself to the next person. So we have a current pointer/index/position which, after getting rid of the first element, we go/increment/move to the second one, and so on.
 
-Going back to \autoref{ch:stack}'s stack chess analogy, when we put those moves into the stack we're kind of pulling them from an array of moves starting at the front until the back is reached. Now lets say there're move moves still happening, plus we want to play back and forth the moves which were already played without waiting for the game to finish. To solve this we can pipe the moves into a special queue as they happen, then push elements from the queue into the first stack. If we want to go to the beginning, then we push the moves from the first stack into the second. To play all the way to the latest move, all that's left is to first push all the elements from the second into the first stack, and push all moves from the queue into the first. The current saved element is the latest move, see \autoref{fig:chess-queue-stack}.
+Going back to \autoref{ch:stack}'s chess analogy, before we put those moves into the stack we're kind of pulling them from an array of moves starting at the front until the back is reached. Now lets say there're move moves still happening, plus we want to play back and forth the moves which were already played without waiting for the game to finish. To solve this we can pipe the moves into a special queue as they happen, then push elements from the queue into the first stack. If we want to go to the beginning, then we push the moves from the first stack into the second. To play all the way to the latest move, all that's left is to first push all the elements from the second into the first stack, and push all moves from the queue into first. The current saved element is the latest move, see \autoref{fig:chess-queue-stack}.
 
 \begin{figure}[p]
     \centering
@@ -35,7 +35,7 @@ However, there is also a slightly better way to implement them, which is to use 
     \label{fig:circular-list}
 \end{figure}
 
-This makes access and removal as simple as getting the head from the tail, also adding elements is easy since we just make the new node's next reference the head and change tail's next to new node, see \autoref{fig:list-queue}. The downside is that circular linked lists are more complex than the classical list implementation, but by just having one tail node pointer we can decrease the size of the structure by quite a bit (or a whopping 32/64 bits at that).
+This makes access and removal as simple as getting the head from the tail, also adding elements is easy since we just make the new node's next reference the head and change tail's next to new node, just see \autoref{fig:list-queue}. The downside is that circular linked lists are more complex than the classical list implementation, but by just having one tail node pointer we can decrease the size of the structure by quite a bit (or a whopping 32/64 bits at that).
 
 \begin{figure}
     \centering
@@ -50,7 +50,11 @@ Another way to implement a queue is to use a static array. We can use dynamic ar
 
 \subsection{Tail-based circular linked list of arrays}
 
-So we have a tail-based circular linked list with nodes, but instead of the node containing only one element it has an entire array of elements. Technically, a simple linked list with one node element is a subset of all possible tail-based circular linked lists. So we have an array of continuous memory for each element, we get rid of the resizing and recopying from the start problem, and last, but least, kinda... we may get better performance for big sizes since it's simpler to allocate a new node of size \(136b = (8b + 128b) = (sizeof(next\_pointer) + (32 * sizeof(integer\_element)))\) than to resize an elements array from 4MiB to 8MiB with potential copying. The downside is that the complexity of tail-based circular linked lists and circular static arrays add up when combined together.
+So we have a tail-based circular linked list with nodes, but instead of the node containing only one element it has an entire array of elements. Technically, a simple linked list with one node element is a subset of all possible tail-based circular linked lists. So we have an array of continuous memory for each element, we get rid of the resizing and recopying from the start problem, and last, but least, kinda//... we may get better performance for big sizes since it's simpler to allocate a new node of size 
+
+\[136b = (8b + 128b) = (sizeof(next\_pointer) + (32 * sizeof(integer\_element)))\]
+
+than it is to resize an elements array from 4MiB to 8MiB with potential copying. The downside is that the code complexity of tail-based circular linked lists and circular static arrays add up when combined together.
 
 \begin{figure}
     \centering
@@ -72,7 +76,8 @@ The node uses a less known C feature - flexible array members, which are arrays 
 The queue structure has a \texttt{tail} node pointer, the classic element \texttt{size} and structure \texttt{length}, and an \texttt{allocator} reference. It also includes a \texttt{current} index which we haven't talked about. The \texttt{current} index represents the position of the front element in head relative to the array, so when the index reaches the end it is set to zero. To get the back element we just add the \texttt{current} index with the queue \texttt{length} and multiply the result with the element \texttt{size}.
 
 \begin{infobox}[title=GNU C Language Manual - Flexible Array Fields]
-The C99 standard adopted a more complex equivalent of zero-length array fields. It’s called a flexible array, and it’s indicated by omitting the length, like this:
+The C99 standard adopted a more complex equivalent of zero-length array fields.
+It’s called a flexible array, and it’s indicated by omitting the length, like this:
 \newline
 \newline
 struct line
@@ -143,7 +148,7 @@ The creation process uses a compound literal to quickly create and return a new 
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-queue-01, title=source/sequence/iqueue.c]
 {
-    ...
+    //...
     return (iqueue_s) { .size = size, .allocator = &standard };
 }
 \end{lstlisting}
@@ -164,14 +169,14 @@ The code is basically the same as the aforementioned function, but with the \tex
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:make-queue-01, title=source/sequence/iqueue.c]
 {
-    ...
+    //...
     return (iqueue_s) { .size = size, .allocator = allocator };
 }
 \end{lstlisting}
 
 \subsection{Queue destruction}
 
-Next up, the \texttt{destroy\_iqueue} function destroys the queue structure and all of its nodes and elements. The element destruction is done by the \texttt{set\_fn destroy} function pointer, which is called for each element before the node is freed. The node destruction is done by iterating through the circular list - not from the tail, but the head, and freeing each node until we get back to the tail. The code is a little bit more complex because of circularity and array node members.
+Next up, the \texttt{destroy\_iqueue} function destroys the queue structure and all of its nodes and elements. The element destruction is done by the \texttt{set\_fn destroy} function pointer, which is called for each element before the node is freed. The node destruction is done by iterating through the circular list - not from the tail, but the head; and freeing each node until we get back to the tail. The code is a little bit more complex because of circularity and array node members.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-queue, title=include/sequence/iqueue.h]
 /// @brief Destroys a structure, and its elements and makes it unusable.
@@ -184,24 +189,24 @@ Since our elements are stored in a linked list it is possible to iterate via goi
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-queue-01, title=source/sequence/iqueue.c]
 {
-    ...
+    //...
     // for each node starting from tail (previous to head)
     struct infinite_queue_node * previous = queue->tail;
     for (size_t start = queue->current; queue->length; start = 0) {
-        ...
+        //...
 \end{lstlisting}
 
-After that the array loop follows, which has a more complex logic, since the head and tail node can have different numbers of elements, unlike the inbetween nodes which are always full. There can also be the case that only one node contains all elements, i.e. head equals tail, and it may not be full and the first and last few element slots may be empty.
+After that the array loop follows, which has a more complex logic, since the head and tail node can have different numbers of elements, unlike the in-between nodes which are always full. There can also be the case that only one node contains all elements, i.e. head equals tail, and it may not be full and the first and last few element slots may be empty.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-queue-02, title=source/sequence/iqueue.c]
-        ...
+        //...
         // destroy elements in previous' next (so head and next)
         size_t i = start;
         for (; i < queue->length && i < IQUEUE_CHUNK; ++i) {
             destroy(previous->next->elements + (i * queue->size));
         }
         queue->length -= (i - start);
-        ...
+        //...
 \end{lstlisting}
 
 All that's left in the loop is to free the node and move to the next one until we get back to the tail, which is the last node to be freed.
@@ -237,7 +242,7 @@ void clear_iqueue(iqueue_s * const queue, set_fn const destroy);
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-queue-01, title=source/sequence/iqueue.c]
 {
-    ...
+    //...
     // for each node starting from tail (previous to head)
     struct infinite_queue_node * previous = queue->tail;
     for (size_t start = queue->current; queue->length; start = 0) {
@@ -277,76 +282,76 @@ First we initialize an empty queue replica.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-queue-01, title=source/sequence/iqueue.c]
 {
-    ...
+    //...
     // create properly initialized replica
     iqueue_s replica = { .size = queue->size, .length = queue->length, .current = queue->current };
-    ...
+    //...
 \end{lstlisting}
 
-Then we create a pointer current pointer to queue's tail and a double pointer to replica's tail so as to be able to change replicas tail and its reference, and remove the special head case.
+Then we create a current pointer to queue's tail and a double pointer to replica's tail so as to be able to change replica's tail and its reference, and remove the special head case.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-queue-02, title=source/sequence/iqueue.c]
-    ...
+    //...
     // set original queue's and replica's current nodes for iteration
     struct infinite_queue_node const * current_queue = queue->tail;
     struct infinite_queue_node ** current_copy = &(replica.tail); // two pointer list to remove special .head case
-    ...
+    //...
 \end{lstlisting}
 
-The loop starts with initializing the remaining elements count and starting index, like in \texttt{destroy\_iqueue} and \texttt{clear\_iqueue}. The loop ends when no elements remain to copy. The \texttt{last} pointer just contains the last created node to make the list circular and redirect the replica's tail to it since it would contain the head after the loop ends.
+The loop starts with initializing the remaining elements count and starting index, like in \texttt{destroy\_iqueue} and \texttt{clear\_iqueue}. The loop ends when no elements to copy remain. The \texttt{last} pointer just contains the last created node to make the list circular and redirect the replica's tail to it since it would contain the head after the loop ends.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-queue-03, title=source/sequence/iqueue.c]
-    ...
+    //...
     struct infinite_queue_node * last = NULL;
     for (size_t remaining = queue->length, start = queue->current; remaining; start = 0) {
-    ...
+    //...
 \end{lstlisting}
 
 The first part of the loop creates a new empty node node and redirects replica's and last's node to it.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-queue-04, title=source/sequence/iqueue.c]
-        ...
+        //...
         // allocate new node for replica
         last = (*current_copy) = queue->allocator->alloc(sizeof(struct infinite_queue_node) + (IQUEUE_CHUNK * queue->size), queue->allocator->arguments);
-        ...
+        //...
 \end{lstlisting}
 
-The second part just makes more redirections for replica's node and changes the queue's current node to the next.
+The second part just makes more redirects for replica's node and changes the queue's current node to the next.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-queue-05, title=source/sequence/iqueue.c]
-        ...
+        //...
         // redirect current replica's node with replica's tail for circularity
         (*current_copy)->next = replica.tail;
         current_queue = current_queue->next;
-        ...
+        //...
 \end{lstlisting}
 
 The third part iterates over the node array and creates copies based on the copy function pointer. The logic is more complex since elements may not lay at the beginnings/ends of the array.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-queue-06, title=source/sequence/iqueue.c]
-        ...
+        //...
         // outside for loop to get copied chunk size, since it can either be 'remaining' or 'IQUEUE_CHUNK'
         size_t i = start;
         for (; i < remaining && i < IQUEUE_CHUNK; ++i) { // while i is less than both 'remaining' and 'IQUEUE_CHUNK'
             copy((*current_copy)->elements + (i * queue->size), current_queue->elements + (i * queue->size));
         }
         remaining -= i; // subtract copied size from remaining size using i
-        ...
+        //...
 \end{lstlisting}
 
 Last part of the loop only redirects to the next replica node.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-queue-07, title=source/sequence/iqueue.c]
-        ...
+        //...
         current_copy = &((*current_copy)->next);
     }
-    ...
+    //...
 \end{lstlisting}
 
-And iwth that the loop ends and all that's left is to properly redirect the replica's tail to the last node and return the initialized structure copy.
+And with that the loop ends and all that's left is to properly redirect the replica's tail to the last node and return the initialized structure copy.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-queue-08, title=source/sequence/iqueue.c]
-    ...
+    //...
     replica.tail = last; // set replica's tail to its last added node (i.e. its tail)
 
     return replica;
@@ -366,7 +371,7 @@ bool is_empty_iqueue(iqueue_s const * const queue);
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:is-empty-queue-01, title=source/sequence/iqueue.c]
 {
-    ...
+    //...
     return (queue->length == 0);
 }
 \end{lstlisting}
@@ -382,29 +387,29 @@ The \texttt{enqueue\_iqueue} function adds an element to the back of the queue. 
 void enqueue_iqueue(iqueue_s * const restrict queue, void const * const restrict buffer);
 \end{lstlisting}
 
-First we check if head's array is full, if yes then we must create a new node and perform redirections, else we just copy the element to the node array.
+First we check if head's array is full, if yes then we must create a new node and perform pointer redirects, else we just copy the element to the node array.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-queue-01, title=source/sequence/iqueue.c]
 {
-    ...
+    //...
     // index where the next element will be enqueued
     size_t const next_index = (queue->current + queue->length) % IQUEUE_CHUNK;
     if (!next_index) { // if head list array is full (is divisible) adds new list element to head
-        ...
+        //...
 \end{lstlisting}
 
 In the condition we create a new node.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-queue-02, title=source/sequence/iqueue.c]
-        ...
+        //...
         struct infinite_queue_node * node = queue->allocator->alloc(sizeof(struct infinite_queue_node) + (IQUEUE_CHUNK * queue->size), queue->allocator->arguments);
-        ...
+        //...
 \end{lstlisting}
 
 At the end of the condition we redirect the newly created node and queue's tail properly.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-queue-03, title=source/sequence/iqueue.c]
-        ...
+        //...
         if (queue->tail == NULL) {
             node->next = node; // create initial circle
         } else {
@@ -418,10 +423,296 @@ At the end of the condition we redirect the newly created node and queue's tail 
 At last, we copy the element to its proper place in its proper node and increment the length.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-queue-03, title=source/sequence/iqueue.c]
-    ...
+    //...
     memcpy(queue->tail->elements + (next_index * queue->size), buffer, queue->size);
     queue->length++;
 }
 \end{lstlisting}
 
 \subsection{Dequeueing it}
+
+The \texttt{dequeue\_iqueue} function removes the fist added element from the queue's list node at head.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-queue, title=include/sequence/iqueue.h]
+/// @brief Dequeues a single element from the start of the structure.
+/// @param queue Structure to dequeue from.
+/// @param buffer Element buffer to save dequeue.
+void dequeue_iqueue(iqueue_s * const restrict queue, void * const restrict buffer);
+\end{lstlisting}
+
+Firstly the head node is reached and its first element is copied to the buffer, then queue's \texttt{length} is decremented and new \texttt{current} index is calculated.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-queue-01, title=source/sequence/iqueue.c]
+{
+    //...
+    memcpy(buffer, queue->tail->next->elements + (queue->current * queue->size), queue->size);
+    queue->length--; // decrement queue size
+    queue->current = (queue->current + 1) % IQUEUE_CHUNK; // set current to next index in node array
+\end{lstlisting}
+
+If there are no more elements int the queue the last head/tail node is freed and everything is set to zero/NULL. Else if \texttt{current} has circled back to zero the current head node is empty and needs to be freed and removed. After that head's next node becomes the new head.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-queue-02, title=source/sequence/iqueue.c]
+    //...
+    if (!queue->length) { // if queue is empty after extracting element thne free memory and reset everything to zero
+        queue->allocator->free(queue->tail, queue->allocator->arguments); // free empty tail/head node
+
+        queue->current = 0; // if queue is empty make current index 0 to not break enqueue_iqueue operation
+        queue->tail = NULL; // set tail to NULL
+    } else if (queue->current == 0) { // else if current index circles back, free start list element and shift to next
+        struct infinite_queue_node * head = queue->tail->next; // get empty head node
+        queue->tail->next = queue->tail->next->next; // set new head node to its next node
+
+        queue->allocator->free(head, queue->allocator->arguments); // free previous head node
+    }
+}
+\end{lstlisting}
+
+\subsection{Peeking the front}
+
+\texttt{peek\_iqueue} peek the front element at head and saves it into buffer without removing it from the queue.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:peek-queue, title=include/sequence/iqueue.h]
+/// @brief Peeks a single element from the start of the structure.
+/// @param queue Structure to peek.
+/// @param buffer Element buffer to save peek.
+void peek_iqueue(iqueue_s const * const restrict queue, void * const restrict buffer);
+\end{lstlisting}
+
+We just copy the \texttt{current} element at head into the buffer and return.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:peek-queue-01, title=source/sequence/iqueue.c]
+{
+    //...
+    memcpy(buffer, queue->tail->next->elements + (queue->current * queue->size), queue->size);
+}
+\end{lstlisting}
+
+
+\subsection{For each element}
+
+Each element can be accessed and manipulated through the special \texttt{each\_iqueue} function which iterates from the front to the back, making its way backwards. That is standard queue traversal behavior.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-queue, title=include/sequence/iqueue.h]
+/// @brief Iterates over each element in structure starting from the beginning.
+/// @param queue Structure to iterate over.
+/// @param handle Function pointer to operate on each element reference using element size and generic arguments.
+/// @param arguments Generic arguments to use in function pointer.
+void each_iqueue(iqueue_s const * const restrict queue, handle_fn const handle, void * const restrict arguments);
+\end{lstlisting}
+
+Initially we need to save the remaining size as the queue's \texttt{length} and the previous node as the tail to start iteration from the head. Since head and tail may not have elements saved at the beginning/end of their arrays, we need to create the remaining size.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-queue-01, title=source/sequence/iqueue.c]
+{
+    //...
+    size_t remaining = queue->length; // save queue size as remaining size for iteration
+    struct infinite_queue_node const * previous = queue->tail;
+\end{lstlisting}
+
+The for loop iterates over each node and element until remaining size is zero. Since the first inserted element is stored in head the current node is inferred from the previous node's next reference. The secondary for loop just makes sure to begin iteration from the current index position in array and then continue from zero while elements are handled. The handle function is checked and ends the main \texttt{each\_iqueue} function when handle returns false.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-queue-02, title=source/sequence/iqueue.c]
+    //...
+    // while remaining size wasn't decremented to zero
+    for (size_t start = queue->current; remaining; start = 0, previous = previous->next) {
+        struct infinite_queue_node * current = previous->next;
+
+        size_t i = start; // save i outside loop to later use it in subtraction
+        for (;i < remaining && i < IQUEUE_CHUNK; ++i) { // while i is less than either remaining size or node's array size
+            // handle on element and if zero is returned then end main function
+            if (!handle(current->elements + (i * queue->size), arguments)) {
+                return;
+            }
+        }
+        remaining -= (i - start); // subtract absolute value of i and start from remaining size
+    }
+}
+\end{lstlisting}
+
+\subsection{Apply sorting or something}
+
+\texttt{apply\_iqueue} applies a \texttt{process} function pointer on an array of elements, thus allowing sorting of queue elements. It is way more complex than the \texttt{apply\_istack} function from the previous chapter.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-queue, title=include/sequence/iqueue.h]
+/// @brief Apply each element in structure into an array to manage.
+/// @param queue Structure to map.
+/// @param process Function pointer to manage array of elements using strucuter length, element size and arguments.
+/// @param arguments Generic arguments to use in function pointer.
+void apply_iqueue(iqueue_s const * const restrict queue, process_fn const process, void * const restrict arguments);
+\end{lstlisting}
+
+At the beginning we allocate a temporary array to save the elements from the queue's nodes. The array \texttt{size} is the queue's \texttt{length} multiplied by the element size.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-queue-01, title=source/sequence/iqueue.c]
+{
+    //...
+    // create elements array to temporary save element from circular linked list nodes
+    char * elements_array = queue->allocator->alloc(queue->length * queue->size, queue->allocator->arguments);
+\end{lstlisting}
+
+Then we have our first evil for loop, which iterates over the nodes and elements in the same way as \texttt{each\_iqueue}, but instead of handling each element it saves them into the temporary array. The logic is complex.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-queue-02, title=source/sequence/iqueue.c]
+    //...
+    size_t index = 0, remaining = queue->length; // temporary variable to save queue's size
+    struct infinite_queue_node const * previous = queue->tail; // create node pointer to save previous nodes into
+    for (size_t start = queue->current; remaining; start = 0, previous = previous->next) {
+        size_t i = start; // extract i from for loop to later subtract it from remaining size
+        for (;i < remaining && i < IQUEUE_CHUNK; ++i) { // while i is less than remaining size and node array size
+            // save previous' next elements (so current) to elements array at index, and increment index
+            memcpy(elements_array + (index * queue->size), previous->next->elements + (i * queue->size), queue->size);
+            index++;
+        }
+        remaining -= (i - start); // subtract absolute value of i and start from remaining size
+    }
+    //...
+\end{lstlisting}
+
+Now we can finally process the elements as a single array.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-queue-03, title=source/sequence/iqueue.c]
+    //...
+    process(elements_array, queue->length, arguments); // process initialized elements array
+    //...
+\end{lstlisting}
+
+Now we go the the second evil for loop, which basically just copies the elements from the array into the queue's nodes, thus saving the changes made by the process function. The logic is basically the same as the first loop, but instead of saving elements into the array it saves them back into the nodes.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-queue-04, title=source/sequence/iqueue.c]
+    //...
+    index = 0, remaining = queue->length, previous = queue->tail;
+    for (size_t start = queue->current; remaining; start = 0, previous = previous->next) { // save elements array back into queue
+        size_t i = start; // extract i from for loop to later subtract it from remaining size
+        for (;i < remaining && i < IQUEUE_CHUNK; ++i) { // while i is less than remaining size and node array size
+            memcpy(previous->next->elements + (i * queue->size), elements_array + (index * queue->size), queue->size);
+            index++;
+        }
+        remaining -= (i - start); // subtract absolute value of i and start from remaining size
+    }
+    //...
+\end{lstlisting}
+
+And all that's left is to free the temporary array and return.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-queue-05, title=source/sequence/iqueue.c]
+    //...
+    queue->allocator->free(elements_array, queue->allocator->arguments);
+}
+\end{lstlisting}
+
+\section{Example usage}
+
+\subsection{Creating and clearing/destroying a queue of integers}
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:queue-example-01]
+#include <sequence/iqueue.h>
+
+void intdst(void * const element) {
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
+}
+
+int main(void) {
+    iqueue_s queue = create_iqueue(sizeof(int));
+
+    // some operations
+
+    clear_iqueue(&queue, intdst);
+
+    // some new operations
+
+    destroy_iqueue(&queue, intdst);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Enqueueing, peeking and dequeueing integer elements}
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:queue-example-02]
+#include <stdio.h>
+#include <sequence/iqueue.h>
+
+void intdst(void * const element) {
+    (*(int*)element) = 0;
+    // (void)(element);
+}
+
+int main(void) {
+    iqueue_s queue = create_iqueue(sizeof(int));
+
+    // enqueue 10 elements
+    for(int i = 0; i < 10; i++) {
+        enqueue_iqueue(&queue, &i);
+    }
+
+    // see if front element is 0
+    int v = -1;
+    peek_iqueue(&queue, &v);
+    printf("%d\n", v);
+
+    // dequeue and print all elements
+    while(!is_empty_iqueue(&queue)) {
+        dequeue_iqueue(&queue, &v);
+        printf("%d ", v);
+    }
+
+    destroy_iqueue(&queue, intdst);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Iterating and sorting}
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:queue-example-03]
+#include <stdio.h>
+#include <stdlib.h>
+#include <sequence/iqueue.h>
+
+void intdst(void * const element) {
+    (*(int*)element) = 0;
+    // (void)(element);
+}
+
+int intrcmp(void * const a, void * const b) {
+    return (*(int*)b)  - (*(int*)a); // reverse comparison
+}
+
+bool intprt(void * const element, void * format) {
+    printf(format, (*(int*)element));
+    return true;
+}
+
+void intsrt(void * const array, size_t const length, void * const compare) {
+    qsort(array, length, sizeof(int), compare);
+}
+
+int main(void) {
+    iqueue_s queue = create_iqueue(sizeof(int));
+
+    // enqueue 10 elements
+    for(int i = 0; i < 10; i++) {
+        enqueue_iqueue(&queue, &i);
+    }
+
+    // print each element from start to end in order
+    each_iqueue(&queue, intprt, "%d ");
+
+    // sort elements in reverse
+    // YOU SHOULD NOT CAST A FUNCTION POINTERS INTO VOID* 
+    // ARGUMENTS, THIS IS JUST A SILLY EXAMPLE, INSTEAD PUT 
+    // THE FUNCTION POINTER INSIDE A STRUCT AND PUT THE 
+    // INITIALIZED STRUCT POINTER ITSELF AS AN ARGUMENT
+    apply_iqueue(&queue, intsrt, intrcmp);
+    puts("");
+
+    // print each element from start to end in reverse
+    each_iqueue(&queue, intprt, "%d ");
+
+    destroy_iqueue(&queue, intdst);
+
+    return 0;
+}
+\end{lstlisting}
+

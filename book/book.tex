@@ -70,6 +70,15 @@
 \usepackage{natbib}
 \usepackage{ulem}
 
+\usepackage{titlesec}
+
+\titleclass{\part}{top} % Nastaví 'part' ako bežnú sekciu
+\titleformat{\part}[display]
+  {\normalfont\huge\bfseries}{\partname\ \thepart}{20pt}{\Huge}
+\titlespacing*{\part}{0pt}{50pt}{40pt}
+
+
+
 \makeindex             % used for the subject index
                        % please use the style svind.ist with
                        % your makeindex program
