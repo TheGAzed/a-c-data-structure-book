@@ -8,8 +8,6 @@ The reasons for choosing this name are three-fold; making this library was like 
 
 The \texttt{cerpec.h} serves as the parent containing all the necessary definitions shared among all the data structures. The header can be divided into four parts.
 
-\nocite{kernighan1988c}
-
 \subsection{Growth factor and chunk size}
 
 The growth factor \texttt{CERPEC\_FACTOR} represents the factor by which to determine the previous and next memory size to resize into when we're either out of space or if smaller space is available. 
@@ -39,7 +37,6 @@ The chunk size \texttt{CERPEC\_CHUNK} is used to avoid a small starting size whe
 \end{lstlisting}
 
 \subsection{Error and validation handling}
-\nocite{lewboskiAssert}
 
 Assertions are a simple way to check if certain properties are true either before or after an action has been performed. For \texttt{cerpec} there are two types of assertions - \texttt{error} and \texttt{valid} (see \autoref{lst:assert}).
 
@@ -67,8 +64,6 @@ It's just a means to allow the user to specify which assertions they want to che
 \end{lstlisting}
 
 \subsection{Custom memory allocator}
-
-\nocite{linuxManPage}
 
 Each structure has a pointer to a custom memory allocator which can be used to allocate, free and reallocate memory based on arguments. The \texttt{standard} memory allocator is a constant external variable that uses the standard library's \texttt{malloc}, \texttt{free} and \texttt{realloc} functions in the \texttt{create\_*} data structure functions. Below is an example of how the book shows standard C library functions, these ones taken from the Linux manual pages.
 
@@ -160,8 +155,6 @@ I made up these following mantras used by the data structures:
 
 \subsubsection{C++}
 
-\nocite{cplusplusReference}
-
 The C++ programming language and its standard data structures have been a great source of inspiration for this project. Many structures follow the same design and implementations as the C++ standard library. Every time I wasn't sure how to implement something I looked up how C++ did it and adapted it to C. With that said, there were some gaps.
 
 \subsection{Python}
@@ -170,9 +163,13 @@ From Python I took the idea of set operations. I decided to implement them just 
 
 \subsection{Haskell}
 
+
+Haskell is probably the most quintessential programming language for my library. Using function pointers as parameters is the thing that defines this project and without Haskell's higher order functions serving as inspiration I wouldn't be able to make the project into reality. Haskell lists also played a significant role of inspiration. As is evident in the many operations one can perform on \texttt{cerpec's} lists.
+
+\nocite{kernighan1988c}
+\nocite{lewboskiAssert}
+\nocite{linuxManPage}
+\nocite{cplusplusReference}
 \nocite{nriPreludeList}
 
-Haskell is probably the most quintessential programming language for my library. Using function pointers as parameters is the thing that defines this project and without Haskell's higher order functions serving as inspiration I wouldn't be able to make the project into reality. Haskell lists also played a significant role of inspiration. As is evident in the many operations one can perform on \texttt{cerpec's} lists. 
-
-\bibliographystyle{plain}
-\bibliography{references/cerpec}
+\printbibliography[heading=subbibintoc, title={References}]
