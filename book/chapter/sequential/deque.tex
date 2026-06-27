@@ -1,1 +1,15 @@
 \chapter{Deque} \label{ch:deque}
+
+By imagining a music player, it has a list of songs which the user can play. To play the songs a user needs to interact with a music player interface. The user can click play, but when they don't like the initial song they can also interact with a next (and/or previous) button. When the next song is selected, what should happen when the previous button is clicked? Of course, the previously loaded song should start playing. To implement this functionality a programmer can employ a deque.
+
+Deque's allow data insertion and removal from both ends, which can be a little bit confusing to wrap your head around, but that is the functionality needed for such projects.
+
+Going back to \autoref{ch:queue}'s playback chess player, since the game is short, it will be quite fast to push all moves to the queue. It may be more convenient to use deque for smaller sets of moves. We have a deque with all chess moves inside it, so to play back and forth all that is needed is to have a full deque and an integer variable that stores the number of steps taken and a sign representing the direction from the initial/first move (since players don't usually allow circling to the other end when the current pointer lies on the edge).
+
+\section{Implementations of a deque}
+
+The deque also has three implementations.
+
+\subsection{The simple array}
+
+The simplest implementation can include an array of objects and an index pointing to the current objects. To move through them all that's needed is to increment/decrement the index. But what if the index is zero and decrementing causes the index to become negative, or even worse - underflow? The answer is simple, check if index is zero and then set \(current = length - 1\). The simple array-based deque also needs to store the object count - deque length. Overflowing is fixed by checking if the current index is less than deque's length.

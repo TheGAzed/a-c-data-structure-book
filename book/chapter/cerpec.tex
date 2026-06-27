@@ -110,17 +110,21 @@ extern const memory_s standard;
 
 \subsection{Function pointers}
 
-\autoref{lst:function-pointers} is a code snippet list of all available function pointers which allow for more generic and user-defined data manipulation.
+\autoref{lst:function-pointers} is a code snippet list of all available function pointers which allow for more generic and user-defined data manipulation. One minor philosophy I would like to point out is the usage of \texttt{void*} arguments for the function pointers. This concept is based on reentrant-ness, specifically from the \texttt{qsort\_r} function in \texttt{stdlib.h}. In it, the \texttt{compare} function pointer for \texttt{qsort} uses a third argument which allows it to avoid using global variables and thus allows the user to use threads more safely. From my personal perspective, I don't care about multithreading, but I needed those reentrant function pointers for my other personal ECS project.
+
+\begin{infobox}[title=Linux manual page - qsort\_r(3)]
+The \texttt{qsort\_r()} function is identical to \texttt{qsort()} except that the comparison function compar takes a third argument. A pointer is passed to the comparison function via arg.  In this way, the comparison function does not need to use global variables to pass through arbitrary arguments, and is therefore reentrant and safe to use in threads.
+\end{infobox}
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:function-pointers, title=include/cerpec.h]
-typedef void   (*set_fn)     (void * const element);
-typedef void * (*copy_fn)    (void * const destination, void const * const source);
-typedef size_t (*hash_fn)    (void const * const element);
-typedef int    (*compare_fn) (void const * const a, void const * const b);
-typedef bool   (*filter_fn)  (void const * const element);
-typedef bool   (*handle_fn)  (void * const element, void * const arguments);
-typedef void   (*process_fn) (void * const array, size_t const length, void * const arguments);
-typedef void   (*operate_fn) (void * const result, void const * const a, void const * const b);
+typedef void   (*set_fn)     (void * const element, void * arg);
+typedef void * (*copy_fn)    (void * const destination, void const * const source, void * arg);
+typedef size_t (*hash_fn)    (void const * const element, void * arg);
+typedef int    (*compare_fn) (void const * const a, void const * const b, void * arg);
+typedef bool   (*filter_fn)  (void const * const element, void * arg);
+typedef bool   (*handle_fn)  (void * const element, void * arg);
+typedef void   (*process_fn) (void * const array, size_t const lenght, void * arg);
+typedef void   (*operate_fn) (void * const result, void const * const a, void const * const b, void * arg);
 \end{lstlisting}
 
 The explanation for each of the function pointers is as follows:
@@ -153,6 +157,8 @@ I made up these following mantras used by the data structures:
 
 \subsection{How others did it}
 
+A short description of how other programming languages implemented certain structures and how I took creative liberty in reimplementing them.
+
 \subsubsection{C++}
 
 The C++ programming language and its standard data structures have been a great source of inspiration for this project. Many structures follow the same design and implementations as the C++ standard library. Every time I wasn't sure how to implement something I looked up how C++ did it and adapted it to C. With that said, there were some gaps.
@@ -163,13 +169,10 @@ From Python I took the idea of set operations. I decided to implement them just 
 
 \subsection{Haskell}
 
-
 Haskell is probably the most quintessential programming language for my library. Using function pointers as parameters is the thing that defines this project and without Haskell's higher order functions serving as inspiration I wouldn't be able to make the project into reality. Haskell lists also played a significant role of inspiration. As is evident in the many operations one can perform on \texttt{cerpec's} lists.
 
-\nocite{kernighan1988c}
-\nocite{lewboskiAssert}
-\nocite{linuxManPage}
-\nocite{cplusplusReference}
-\nocite{nriPreludeList}
+\section{On a final note}
+
+From a more in-depth explanation of the C programming language I recommend reading \cite{kernighan1988c} as this is the \texttt{goto} C book. Since reading a book can be exhausting and most of the stuff in it will be easily forgotten the Linux Manual Pages \cite{linuxManPage} are a quick way to look up official documentation. For a more casual explanation of the benefits of using \texttt{assert} in your codebase you can watch this short YouTube video \cite{lewboskiAssert}. Since I mainly talked about C++ and Haskell as my main sources of inspiration for many of the data structures in the next parts chapters I will also cite their references respectively and in order, \cite{cplusplusReference, nriPreludeList}.
 
 \printbibliography[heading=subbibintoc, title={Further reading}]

@@ -161,10 +161,11 @@ The code is basically the same as the aforementioned function, but with the \tex
 Next, \texttt{destroy\_istack} destroys the stack and all its elements while at the same time making it invalid for future usage. The parameters include a pointer to the stack and a function pointer taking in each element, allowing the user to manipulate elements prior to their destruction. The \texttt{destroy()} function pointer can primarily be used to free memory, like strings, from the heap.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-stack, title=include/sequence/istack.h]
-/// @brief Destroys a structure, and its elements and makes it unusable.
+/// @brief Destroys a structure and its elements, but makes it unusable.
 /// @param stack Structure to destroy.
 /// @param destroy Function pointer to destroy a single element.
-void destroy_istack(istack_s * const stack, set_fn const destroy);
+/// @param ad Arguments for destroy function pointer.
+void destroy_istack(istack_s * const stack, set_fn const destroy, void * const ad);
 \end{lstlisting}
 
 Since our elements are stored in an array, i.e. continuous memory, it is possible to write a for loop with a pointer representing a single element to call the \texttt{destroy()} function pointer on. The variable then gets incremented by the specified size until the last valid memory address is reached.
@@ -212,10 +213,11 @@ The \texttt{memset()} function fills the first n bytes of the memory area pointe
 Similar to \texttt{destroy\_istack}, \texttt{clear\_istack} can be used to destroy each element in our structure, but the stack remains valid for next use.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-stack, title=include/sequence/istack.h]
-/// @brief Clears a structure, and destroys its elements, but remains usable.
+/// @brief Clears a structure and destroys its elements, but remains usable.
 /// @param stack Structure to destroy.
 /// @param destroy Function pointer to destroy a single element.
-void clear_istack(istack_s * const stack, set_fn const destroy);
+/// @param ad Arguments for destroy function pointer.
+void clear_istack(istack_s * const stack, set_fn const destroy, void * const ad);
 \end{lstlisting}
 
 This is achieved by freeing the elements array and setting the stack's length and capacity to zero, and elements array NULL.
@@ -387,8 +389,8 @@ Each element can be accessed and manipulated through the special \texttt{each\_i
 /// @brief Iterates over each element in structure starting from the beginning.
 /// @param stack Structure to iterate over.
 /// @param handle Function pointer to handle each element reference using generic arguments.
-/// @param arguments Generic arguments to use in function pointer.
-void each_istack(istack_s const * const restrict stack, handle_fn const handle, void * const restrict arguments);
+/// @param ah Generic arguments to use in function pointer.
+void each_istack(istack_s const * const stack, handle_fn const handle, void * const ah);
 \end{lstlisting} 
 
 All the element are in an array, thus iterating over them is as simple as using an empty for loop. The \texttt{handle} function pointer, together with \texttt{arguments}, allows direct access to the element, thus manipulation is possible. If \texttt{handle} returns false, the iteration automatically stops, kinda like the \texttt{break} keyword in a classic for loop.
@@ -409,8 +411,8 @@ The \texttt{apply\_istack} gives access to all the elements as if they were insi
 /// @brief Apply each element in structure into an array to manage.
 /// @param stack Structure to map.
 /// @param process Function pointer to process array of elements using structure length and arguments.
-/// @param arguments Generic arguments to use in function pointer.
-void apply_istack(istack_s const * const restrict stack, process_fn const process, void * const restrict arguments);
+/// @param ap Generic arguments to use in function pointer.
+void apply_istack(istack_s const * const stack, process_fn const process, void * const ap);
 \end{lstlisting} 
 
 Similarly to the \texttt{each\_istack}, the \texttt{apply\_istack} only has one line of code - the \texttt{process} function pointer itself.
@@ -430,7 +432,8 @@ Similarly to the \texttt{each\_istack}, the \texttt{apply\_istack} only has one 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack-01]
 #include <sequence/istack.h>
 
-void intdst(void * const element) {
+void intdst(void * const element, void * null) {
+    (void)(null);
     (*(int*)element) = 0; // to set to 0, or just use (void)(element);
 }
 
@@ -439,11 +442,11 @@ int main(void) {
 
     // some operations
 
-    clear_istack(&stack, intdst);
+    clear_istack(&stack, intdst, NULL);
 
     // some new operations
 
-    destroy_istack(&stack, intdst);
+    destroy_istack(&stack, intdst, NULL);
 
     return 0;
 }
@@ -455,9 +458,9 @@ int main(void) {
 #include <stdio.h>
 #include <sequence/istack.h>
 
-void intdst(void * const element) {
-    (*(int*)element) = 0;
-    // (void)(element);
+void intdst(void * const element, void * null) {
+    (void)(null);
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
 }
 
 int main(void) {
@@ -479,7 +482,7 @@ int main(void) {
         printf("%d ", v);
     }
 
-    destroy_istack(&stack, intdst);
+    destroy_istack(&stack, intdst, NULL);
 
     return 0;
 }
@@ -492,9 +495,9 @@ int main(void) {
 #include <stdlib.h>
 #include <sequence/istack.h>
 
-void intdst(void * const element) {
-    (*(int*)element) = 0;
-    // (void)(element);
+void intdst(void * const element, void * null) {
+    (void)(null);
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
 }
 
 int intrcmp(void * const a, void * const b) {
@@ -532,9 +535,8 @@ int main(void) {
     // print each element from bottom to top in reverse
     each_istack(&stack, intprt, "%d ");
 
-    destroy_istack(&stack, intdst);
+    destroy_istack(&stack, intdst, NULL);
 
     return 0;
 }
 \end{lstlisting}
-

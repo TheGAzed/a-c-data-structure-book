@@ -4,7 +4,7 @@ Imagine you're waiting for your daily calorie intake, i.e. lunch, in school and 
 
 But that's not how queues in programming work, I mean, technically they can, but//... If each person is a single element and the cafeteria is at the current place of the first person in the queue, then you don't want to move each element to the cafeteria, but move the cafeteria itself to the next person. So we have a current pointer/index/position which, after getting rid of the first element, we go/increment/move to the second one, and so on.
 
-Going back to \autoref{ch:stack}'s chess analogy, before we put those moves into the stack we're kind of pulling them from an array of moves starting at the front until the back is reached. Now lets say there're move moves still happening, plus we want to play back and forth the moves which were already played without waiting for the game to finish. To solve this we can pipe the moves into a special queue as they happen, then push elements from the queue into the first stack. If we want to go to the beginning, then we push the moves from the first stack into the second. To play all the way to the latest move, all that's left is to first push all the elements from the second into the first stack, and push all moves from the queue into first. The current saved element is the latest move, see \autoref{fig:chess-queue-stack}.
+Going back to \autoref{ch:stack}'s chess analogy, before we put those moves into the stack we're kind of pulling them from an array of moves starting at the front until the back is reached. Now lets say there're more moves still happening, plus we want to play back and forth the moves which were already played without waiting for the game to finish. To solve this we can pipe the moves into a special queue as they happen, then push elements from the queue into the first stack. If we want to go to the beginning, then we push the moves from the first stack into the second. To play all the way to the latest move, all that's left is to first push all the elements from the second into the first stack, and push all moves from the queue into first. The current saved element is the latest move, see \autoref{fig:chess-queue-stack}.
 
 \begin{figure}[p]
     \centering
@@ -179,10 +179,11 @@ The code is basically the same as the aforementioned function, but with the \tex
 Next up, the \texttt{destroy\_iqueue} function destroys the queue structure and all of its nodes and elements. The element destruction is done by the \texttt{set\_fn destroy} function pointer, which is called for each element before the node is freed. The node destruction is done by iterating through the circular list - not from the tail, but the head; and freeing each node until we get back to the tail. The code is a little bit more complex because of circularity and array node members.
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-queue, title=include/sequence/iqueue.h]
-/// @brief Destroys a structure, and its elements and makes it unusable.
+/// @brief Destroys a structure and its elements, but makes it unusable.
 /// @param queue Structure to destroy.
 /// @param destroy Function pointer to destroy a single element.
-void destroy_iqueue(iqueue_s * const queue, set_fn const destroy);
+/// @param ad Arguments for destroy function pointer.
+void destroy_iqueue(iqueue_s * const queue, set_fn const destroy, void * const ad);
 \end{lstlisting}
 
 Since our elements are stored in a linked list it is possible to iterate via going to the next node. The head node is the next node from the tail, so in order to begin destruction at the front we must reference the current node from the previous (tail) one.
@@ -237,7 +238,8 @@ Similar to the destruction function, the \texttt{clear\_iqueue} function clears 
 /// @brief Clears a structure and destroys its elements, but remains usable.
 /// @param queue Structure to destroy.
 /// @param destroy Function pointer to destroy a single element.
-void clear_iqueue(iqueue_s * const queue, set_fn const destroy);
+/// @param ad Arguments for destroy function pointer.
+void clear_iqueue(iqueue_s * const queue, set_fn const destroy, void * const ad);
 \end{lstlisting}
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-queue-01, title=source/sequence/iqueue.c]
@@ -274,8 +276,9 @@ Continuing with the high complexity, the next function is the \texttt{copy\_ique
 /// @brief Creates a copy of a structure and all its elements.
 /// @param queue Structure to copy.
 /// @param copy Function pointer to create a deep/shallow copy of a single element.
+/// @param ac Arguments for copy function pointer.
 /// @return Queue structure.
-iqueue_s copy_iqueue(iqueue_s const * const queue, copy_fn const copy);
+iqueue_s copy_iqueue(iqueue_s const * const queue, copy_fn const copy, void * const ac);
 \end{lstlisting}
 
 First we initialize an empty queue replica.
@@ -454,7 +457,7 @@ If there are no more elements int the queue the last head/tail node is freed and
 
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-queue-02, title=source/sequence/iqueue.c]
     //...
-    if (!queue->length) { // if queue is empty after extracting element thne free memory and reset everything to zero
+    if (!queue->length) { // if queue is empty after extracting element, then free memory and reset everything to zero
         queue->allocator->free(queue->tail, queue->allocator->arguments); // free empty tail/head node
 
         queue->current = 0; // if queue is empty make current index 0 to not break enqueue_iqueue operation
@@ -497,8 +500,8 @@ Each element can be accessed and manipulated through the special \texttt{each\_i
 /// @brief Iterates over each element in structure starting from the beginning.
 /// @param queue Structure to iterate over.
 /// @param handle Function pointer to operate on each element reference using element size and generic arguments.
-/// @param arguments Generic arguments to use in function pointer.
-void each_iqueue(iqueue_s const * const restrict queue, handle_fn const handle, void * const restrict arguments);
+/// @param ah Generic arguments to use in function pointer.
+void each_iqueue(iqueue_s const * const queue, handle_fn const handle, void * const ah);
 \end{lstlisting}
 
 Initially we need to save the remaining size as the queue's \texttt{length} and the previous node as the tail to start iteration from the head. Since head and tail may not have elements saved at the beginning/end of their arrays, we need to create the remaining size.
@@ -537,9 +540,9 @@ The for loop iterates over each node and element until remaining size is zero. S
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-queue, title=include/sequence/iqueue.h]
 /// @brief Apply each element in structure into an array to manage.
 /// @param queue Structure to map.
-/// @param process Function pointer to manage array of elements using strucuter length, element size and arguments.
-/// @param arguments Generic arguments to use in function pointer.
-void apply_iqueue(iqueue_s const * const restrict queue, process_fn const process, void * const restrict arguments);
+/// @param process Function pointer to manage array of elements using structure length, element size and arguments.
+/// @param ap Generic arguments to use in function pointer.
+void apply_iqueue(iqueue_s const * const queue, process_fn const process, void * const ap);
 \end{lstlisting}
 
 At the beginning we allocate a temporary array to save the elements from the queue's nodes. The array \texttt{size} is the queue's \texttt{length} multiplied by the element size.
@@ -608,7 +611,8 @@ And all that's left is to free the temporary array and return.
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:queue-example-01]
 #include <sequence/iqueue.h>
 
-void intdst(void * const element) {
+void intdst(void * const element, void * null) {
+    (void)(null);
     (*(int*)element) = 0; // to set to 0, or just use (void)(element);
 }
 
@@ -633,9 +637,9 @@ int main(void) {
 #include <stdio.h>
 #include <sequence/iqueue.h>
 
-void intdst(void * const element) {
-    (*(int*)element) = 0;
-    // (void)(element);
+void intdst(void * const element, void * null) {
+    (void)(null);
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
 }
 
 int main(void) {
@@ -670,9 +674,9 @@ int main(void) {
 #include <stdlib.h>
 #include <sequence/iqueue.h>
 
-void intdst(void * const element) {
-    (*(int*)element) = 0;
-    // (void)(element);
+void intdst(void * const element, void * null) {
+    (void)(null);
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
 }
 
 int intrcmp(void * const a, void * const b) {
@@ -710,7 +714,7 @@ int main(void) {
     // print each element from start to end in reverse
     each_iqueue(&queue, intprt, "%d ");
 
-    destroy_iqueue(&queue, intdst);
+    destroy_iqueue(&queue, intdst, NULL);
 
     return 0;
 }
