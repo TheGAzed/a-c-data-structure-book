@@ -1,26 +1,16 @@
-%%%%%%%%%%%%%%%%%%%% book.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% sample root file for the chapters of your monograph or textbook
-%
-% Use this file as a template for your own input.
-%
-%%%%%%%%%%%%%%%% Springer Nature %%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt]{book}
 
-
-% RECOMMENDED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[graybox,envcountchap,sectrefs]{SNmono}
-
-%\usepackage{mathptmx}
-%\usepackage{helvet}
-%\usepackage{courier}
+\usepackage[a4paper]{geometry}
+\usepackage[english]{babel}
+\usepackage{microtype}
 \usepackage{type1cm}         
 \usepackage{hyperref}
-
 \usepackage{fontspec}
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage[figuresleft]{rotating}
-
+\usepackage{makeidx}
+\usepackage{titling}
 \definecolor{comment}{RGB}{2, 90, 10}
 \definecolor{keyword}{RGB}{140, 58, 140}
 \definecolor{string}{RGB}{98, 41, 2}
@@ -79,17 +69,12 @@
 \usepackage[backend=biber, style=numeric, refsection=chapter]{biblatex}
 \addbibresource{references.bib}
 
-\makeindex             % used for the subject index
-                       % please use the style svind.ist with
-                       % your makeindex program
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\author{Matej Dedina}
+\title{A C Data Structure Book}
+%\posttitle{\par\Large BOOK I\endtitlepage}
 
 \begin{document}
 
-\author{Matej Dedina}
-\title{A C Data Structure Book}
-\subtitle{BOOK I}
 \maketitle
 
 \frontmatter%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,7 +123,3 @@ If I have to put a disclaimer I just want to clarify that the reason why some pa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
-
-
-
-
