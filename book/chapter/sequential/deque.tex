@@ -64,12 +64,14 @@ Combining the properties of both lists and arrays I managed create a deque with 
     \label{fig:array-list-deque}
 \end{figure}
 
-\subsection{The infinite deque structure}
+\section{The infinite deque structure}
 
 The structure consists of a child node structure representing a doubly-linked list node with a flexible array member for storing elements.
 
 The parent structure solely relies on the child head for element storage and traversal. The parent also stores the \texttt{current} front index to simplify front element access in \texttt{peek\_front\_ideque}. Next up is the \texttt{size} member storing individual element size, followed by \texttt{length}. \texttt{length} contains the number of elements in the deque. Lastly, the parent structure stores a pointer to a memory allocator structure for memory management.
 
+\noindent
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:deque, title=include/sequence/ideque.h]
 /// @brief Doubly linked list node for deque structure.
 struct infinite_deque_node {
@@ -85,29 +87,38 @@ typedef struct infinite_deque {
     memory_s const * allocator;
 } ideque_s;
 \end{lstlisting}
+\end{minipage}
 
 \subsection{Create deque}
 
 Creating a deque means only setting the \texttt{size} member to the size of the element type, and setting the \texttt{allocator} to the \texttt{standard} allocator pointer.
 
+\noindent
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-deque, title=include/sequence/ideque.h]
 /// @brief Creates an empty structure.
 /// @param size Size of a single element
 /// @return Deque structure.
 ideque_s create_ideque(size_t const size);
 \end{lstlisting}
+\end{minipage}
 
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-deque-01, title=include/sequence/ideque.c]
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-deque-01, title=source/sequence/ideque.c]
 {
     \\ ...
     return (ideque_s) { .size = size, .allocator = allocator, };
 }
 \end{lstlisting}
+\end{minipage}
 
 \subsection{Make deque}
 
 Making the structure is the same as creating it, but with the added option of using a custom memory allocator.
 
+\noindent
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:make-deque, title=include/sequence/ideque.h]
 /// @brief Creates a custom empty structure.
 /// @param size Size of a single element.
@@ -115,20 +126,26 @@ Making the structure is the same as creating it, but with the added option of us
 /// @return Deque structure.
 ideque_s make_ideque(size_t const size, memory_s const * const allocator);
 \end{lstlisting}
+\end{minipage}
 
 The memory allocator simply gets set to the \texttt{allocator} member of the structure, while the \texttt{size} member is set the same way as in \texttt{create\_ideque}.
 
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:make-deque-01, title=include/sequence/ideque.c]
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:make-deque-01, title=source/sequence/ideque.c]
 {
     \\ ...
     return (ideque_s) { .size = size, .allocator = allocator, };
 }
 \end{lstlisting}
+\end{minipage}
 
 \subsection{Destroy deque}
 
 Destroying the deque means freeing each element using the \texttt{destroy} function pointer and its \texttt{ad} arguments. The destroy function pointer can either do nothing, set bytes in the element to zero or free the element if it is contains allocated memory.
 
+\noindent
+\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque, title=include/sequence/ideque.h]
 /// @brief Destroys a structure and its elements, but makes it unusable.
 /// @param deque Structure to destroy.
@@ -136,42 +153,224 @@ Destroying the deque means freeing each element using the \texttt{destroy} funct
 /// @param ad Arguments for destroy function pointer.
 void destroy_ideque(ideque_s * const deque, set_fn const destroy, void * const ad);
 \end{lstlisting}
+\end{minipage}
 
 First a current node pointer is initialized to the head node, then a for loop sets a \texttt{start} index for the current index position for the special case that a node has elements not at the start of the array. All the other nodes have therefore elements starting at index zero, hence the \texttt{start} variable is set to zero after the first iteration.
 
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-01, title=include/sequence/ideque.c]
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-01, title=source/sequence/ideque.c]
 {
     \\ ...
     struct infinite_deque_node * current = deque->head; // save head index as current node
     // for every node in deque list until size is not zero
     for (size_t start = deque->current, remaining = deque->length; remaining; start = 0) {
 \end{lstlisting}
+\end{minipage}
 
 Following that, the index variable \texttt{i} is set to the \texttt{start} index, and a nested for loop iterates over the elements in the current node, destroying each element using the \texttt{destroy} function pointer. The loop continues until either all remaining elements have been destroyed or the end of the current node's elements array is reached. After destroying the elements, the \texttt{remaining} variable is updated to reflect the number of elements left to destroy.
 
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-02, title=include/sequence/ideque.c]
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-02, title=source/sequence/ideque.c]
         size_t i = start; // set i outside of nested for loop to save its value
         for (; i < (remaining + start) && i < IDEQUE_CHUNK; ++i) { // destroy each element in node
             destroy(current->elements + (i * deque->size), ad);
         }
         remaining -= (i - start); // subtract absolute value of i and start from deque's size
 \end{lstlisting}
+\end{minipage}
 
 Lastly, the current node is saved as a temporary variable \texttt{temp} for later freeing. Next the \texttt{current} node pointer is updated to point to the next node in the list. Finally, \texttt{temp} is freed using the defined memory allocator's \texttt{free} function.
 
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-03, title=include/sequence/ideque.c]
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-03, title=source/sequence/ideque.c]
         struct infinite_deque_node * temp = current; // save current node as temporary to free later
         current = current->next; // go to next node
 
         deque->allocator->free(temp, deque->allocator->arg); // free temporary current node
     }
 \end{lstlisting}
+\end{minipage}
 
 All that is left is to zero-out the deque structure, which is done by using \texttt{memset}.
 
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-04, title=include/sequence/ideque.c]
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-deque-04, title=source/sequence/ideque.c]
 
     // set everything to zero
     memset(deque, 0, sizeof(ideque_s));
 }
 \end{lstlisting}
+\end{minipage}
+
+\subsection{Clear deque}
+
+Clearing the deque is similar to destroying it, but with the difference being that the structure remains usable. Usability means the deque can still support insertion, deletion and search.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-deque, title=include/sequence/ideque.h]
+/// @brief Clears a structure and destroys its elements, but remains usable.
+/// @param deque Structure to destroy.
+/// @param destroy Function pointer to destroy a single element.
+/// @param ad Arguments for destroy function pointer.
+void clear_ideque(ideque_s * const deque, set_fn const destroy, void * const ad);
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-deque-01, title=source/sequence/ideque.c]
+{
+    struct infinite_deque_node * current = deque->head; // save head index as current node
+    for (size_t start = deque->current; deque->length; start = 0) { // for every node in deque list until size is not zero
+        size_t i = start; // set i outside of nested for loop to save its value
+        for (; i < (deque->length + start) && i < IDEQUE_CHUNK; ++i) { // destroy each element in node
+            destroy(current->elements + (i * deque->size), ad);
+        }
+        deque->length -= (i - start); // subtract absolute value of i and start from deque's size
+
+        struct infinite_deque_node * temp = current; // save current node as temporary to free later
+        current = current->next; // go to next node
+
+        deque->allocator->free(temp, deque->allocator->arg); // free temporary current node
+    }
+
+    deque->current = deque->length = 0;
+    deque->head = NULL;
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Copy deque}
+
+Copying is done eon a per-element basis using iteration through each array element and node. The user is able to copy elements in any way they see fit, which also includes deep/shallow copying, and reentrant copies.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-deque, title=include/sequence/ideque.h]
+/// @brief Creates a copy of a structure and all its elements.
+/// @param deque Structure to copy.
+/// @param copy Function pointer to create a deep/shallow copy of a single element.
+/// @param ac Arguments for copy function pointer.
+/// @return Deque structure.
+ideque_s copy_ideque(ideque_s const * const deque, copy_fn const copy, void * const ac);
+\end{lstlisting}
+\end{minipage}
+
+We begin by creating a return \texttt{replica} deque structure which gets initialized with the same members as the deque to copy (except the head node pointer of course).
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    ideque_s replica = {
+        .current = deque->current, .size = deque->size, .length = deque->length, .allocator = deque->allocator,
+    };
+    
+\end{lstlisting}
+\end{minipage}
+
+First two node pointers are initialized. The first one is a simple current node pointer of the deque head to iterate over. Second is a double pointer to the memory location of the replica for simpler node update.
+
+Next we initialize the for loop with a \texttt{start} index for the special case that the first node can have elements not at the zeroth array position. Continuing on, a remaining length variable is initialized to keep track of how many elements remain to copy.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-deque-02, title=source/sequence/ideque.c]
+    struct infinite_deque_node const * current_deque = deque->head; // save head index as current node
+    struct infinite_deque_node ** current_replica = &(replica.head);
+    for (size_t start = deque->current, remaining = deque->length; remaining; start = 0) { // while remaining remains
+\end{lstlisting}
+\end{minipage}
+
+Inside the loop, a new node is allocated and temporary set as \texttt{node} with proper memory size consisting of this formula: 
+
+\[sizeof_{node} + (chunk_{deque} \times size_{element})\]
+
+A copied element counter \texttt{i} is set to \texttt{start} for the inner loop that iterates through each node's array until remaining length or \texttt{IDEQUE\_CHUNK} is reached. Each element is then copied into allocated node's array to the same index. Lastly, the remaining length is decremented by copied size \(i - start\) to fix the \texttt{start} shift.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-deque-03, title=source/sequence/ideque.c]
+        // allocate node for replica
+        struct infinite_deque_node * node = deque->allocator->alloc(sizeof(struct infinite_deque_node) + (IDEQUE_CHUNK * deque->size), deque->allocator->arg);
+        // ...
+
+        // copy each element from old to replica
+        size_t i = start;
+        for (; i < IDEQUE_CHUNK && i < remaining + start; ++i) { // operate on each element in node
+            copy(node->elements + (i * deque->size), current_deque->elements + (i * deque->size), ac);
+        }
+        remaining -= (i - start); // decrement remaining size by operated size of current node
+\end{lstlisting}
+\end{minipage}
+
+Lets see. The worst way to explain this code is to set the reason straight as to why \texttt{current\_replica} is a double pointer. The answer is so that we can directly change the pointer value \texttt{current\_replica} node in the deque struct or member in parent node struct instead of changing the value in the \texttt{current\_replica} variable. First we make \texttt{node} circular to itself from its previous node, together with \texttt{current\_replica}. That all is needed so the code remains general for both the cases of  \texttt{current\_replica} being either the head or body nodes.
+
+Node's next member is set to head's previous pointer, because that guarantees circularity.
+
+Node's previous member is reset to head's previous node, if \texttt{current\_replica} is the head, then circularity is retained, otherwise the node's previous pointer gets corrected.
+
+Head's previous node is set current node as the current node represents the last node added, which is where head's previous must point to. Overall, it is pretty hard code to understand just to avoid a couple \texttt{if} conditions.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-deque-04, title=source/sequence/ideque.c]
+        // current_replica and node's prev will point to node
+        (*current_replica) = node->prev = node;
+        // node's next points to head (if current_replica is head then node's next points to node)
+        node->next = replica.head;
+        // node's prev points to head's prev (if current_replica is head then head/prev is node, else prev is previous node)
+        node->prev = replica.head->prev;
+        // head's prev points to node (if current_copy is head then head/node prev is node, else head prev is last node)
+        replica.head->prev = node;
+\end{lstlisting}
+\end{minipage}
+
+On a simple node, the last thing we do inside the loop is set \texttt{current\_replica} and \texttt{current\_deque} to the next pointer to pointer, and just pointer address, respectively. In the end, the properly initialized \texttt{replica} is returned.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-deque-05, title=source/sequence/ideque.c]
+        current_replica = &((*current_replica)->next); // go to next's node pointer
+        current_deque = current_deque->next; // go to next node
+    }
+
+    return replica;
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Is empty deque}
+
+Returns true if deque is empty.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-deque, title=include/sequence/ideque.h]
+/// @brief Checks if structure is empty.
+/// @param deque Structure to check.
+/// @return 'true' if empty, 'false' if not.
+bool is_empty_ideque(ideque_s const * const deque);
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[ language=C, style=CodeEditor, label=lst:copy-deque-05, title=source/sequence/ideque.c]
+{
+    // ...
+    return (deque->length == 0);
+}
+\end{lstlisting}
+\end{minipage}
+
+
+
+
+
