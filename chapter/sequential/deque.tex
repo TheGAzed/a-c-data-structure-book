@@ -370,7 +370,200 @@ bool is_empty_ideque(ideque_s const * const deque);
 \end{lstlisting}
 \end{minipage}
 
+\subsection{Enqueue deque front}
 
+Enqueues element to the front of the deque. The front is defined as the \texttt{head} node's \texttt{current} index element. The inserted element is provided as a pointer \texttt{buffer} parameter.
 
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-front-deque, title=include/sequence/ideque.h]
+/// @brief Enqueues a single element to the front of the structure.
+/// @param deque Structure to enqueue into.
+/// @param buffer Element buffer to enqueue.
+void enqueue_front_ideque(ideque_s * const deque, void const * const buffer);
+\end{lstlisting}
+\end{minipage}
 
+First enqueue front checks if \texttt{current} index is zero. That is because if it is, then a new node needs to be created, pointers need to be redirected and saved to the structure.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[ language=C, style=CodeEditor, label=lst:enqueue-front-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    if (!(deque->current)) { // if deque's previous current 'underflows' in node array due to inserting element to front
+\end{lstlisting}
+\end{minipage}
+
+The \texttt{current} index is changed to \texttt{IDEQUE\_CHUNK} to later correct it to the last element in node's array during \texttt{current} decrement. Next a new node is allocated using the size of a singular node and chunk size multiplied with the size of a single element.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[ language=C, style=CodeEditor, label=lst:enqueue-front-deque-02, title=source/sequence/ideque.c]
+        deque->current = IDEQUE_CHUNK; // make current into list array chunk size to prevent future underflow
+
+        // allocate node for replica
+        struct infinite_deque_node * node = deque->allocator->alloc(sizeof(struct infinite_deque_node) + (IDEQUE_CHUNK * deque->size), deque->allocator->arg);
+        // ...
+\end{lstlisting}
+\end{minipage}
+
+The last thing done inside the \texttt{if} body is to check if a head exists (\texttt{head != NULL}). If head ain't \texttt{NULL}, node is properly redirected so its \texttt{next} pointer becomes head and its \texttt{prev} pointer becomes head's previous. Lastly, head's previous and head previous' next are set to \texttt{node} together with deque's \texttt{head}.
+
+The else condition body makes the node circular and also sets deque's \texttt{head} to \texttt{node}. Which is way simpler to explain and understand than the \texttt{if} body statements.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[ language=C, style=CodeEditor, label=lst:enqueue-front-deque-03, title=source/sequence/ideque.c]
+        if (deque->head) { // if head exists
+            node->next = deque->head; // node's next is head
+            node->prev = deque->head->prev; // node's previous is tail/head's previous
+
+            deque->head = deque->head->prev = deque->head->prev->next = node;
+        } else { // else head does not exist
+            deque->head = node->next = node->prev = node; // node's next and previous is node and node becomes head
+        }
+    }
+\end{lstlisting}
+\end{minipage}
+
+The last part of the enqueue front function increments the deque's \texttt{length} and decrements \texttt{current} (to make it point to the last element in the array if it was zero (it circles back (to the beginning))). The \texttt{buffer} element is memcopied to deque head element's current position.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[ language=C, style=CodeEditor, label=lst:enqueue-front-deque-04, title=source/sequence/ideque.c]
+    deque->length++; // increment size for new element insertion
+    deque->current--; // if current was 0 then current will be 'IDEQUE_CHUNK - 1'
+    memcpy(deque->head->elements + (deque->current * deque->size), buffer, deque->size); // copy element into deque's head
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Enqueue deque back}
+
+Enqueues element to the back of the deque. The back position is defined as an element located at the position \(current + length - 1\). The element also gets saved as a \texttt{buffer} to that position.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-back-deque, title=include/sequence/ideque.h]
+/// @brief Enqueues a single element to the back of the structure.
+/// @param deque Structure to enqueue into.
+/// @param buffer Element buffer to enqueue.
+void enqueue_back_ideque(ideque_s * const deque, void const * const buffer);
+\end{lstlisting}
+\end{minipage}
+
+The \texttt{next\_index} represents the next index where the \texttt{buffer} element gets saved relative to the node array. Relativity is achieved with \texttt{IDEQUE\_CHUNK} modulo of \(current + length\).
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-back-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    size_t const next_index = ((deque->current + deque->length) % IDEQUE_CHUNK);
+    if (!next_index) { // if next index to insert into is zero
+\end{lstlisting}
+\end{minipage}
+
+Under the if condition a new node gets allocated.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-back-deque-02, title=source/sequence/ideque.c]
+        struct infinite_deque_node * node = deque->allocator->alloc(sizeof(struct infinite_deque_node) + (IDEQUE_CHUNK * deque->size), deque->allocator->arg);
+        // ...
+\end{lstlisting}
+\end{minipage}
+
+The nested if checks if \texttt{head} is \texttt{NULL}. If true, then the node is inserted just like in \texttt{enqueue\_front\_ideque}, but the node doesn't become the head node (it remains tailly, like... tail-esque). The else body is the same as the enqueue front's, since the head and tail are one and the same.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-back-deque-03, title=source/sequence/ideque.c]
+        if (deque->head) { // if head exists
+            node->next = deque->head; // node's next is head
+            node->prev = deque->head->prev; // node's previous is tail/head's previous
+
+            deque->head->prev = deque->head->prev->next = node; // node is tail's next and head's previous, and node becomes tail
+        } else { // else head does not exist
+            deque->head = node->next = node->prev = node; // node's next and previous is node and node becomes head
+        }
+    }
+\end{lstlisting}
+\end{minipage}
+
+Finally, all that is left is to only increment deque's \texttt{length} and memory copy to head previous', or tail's for short, element array at relative \texttt{next\_index} index index.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:enqueue-back-deque-04, title=source/sequence/ideque.c]
+    deque->length++; // increment size for new element insertion
+    memcpy(deque->head->prev->elements + (next_index * deque->size), buffer, deque->size); // copy element into deque's tail
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Dequeue deque front}
+
+The dequeue, unlike the enqueue, removes the front element from the deque, but like the enqueue, the dequeue works with the \texttt{current} index position. The \texttt{buffer} stores the removed element.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque, title=include/sequence/ideque.h]
+/// @brief Dequeues a single element from the front of the structure.
+/// @param deque Structure to dequeue from.
+/// @param buffer Element buffer to save dequeue.
+void dequeue_front_ideque(ideque_s * const deque, void * const buffer);
+\end{lstlisting}
+\end{minipage}
+
+Now the front-most element gets saved to the buffer and \texttt{current} increments, while the \texttt{length} decrements. Which reflects common deque behavior.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    memcpy(buffer, deque->head->elements + (deque->current * deque->size), deque->size);
+    deque->current++; // increment current index since it's removing from front (like a queue)
+    deque->length--; // decrement deque's size since front elements gets removed (like a queue)
+\end{lstlisting}
+\end{minipage}
+
+Next up, if a node becomes empty and needs to be removed, an if condition checks if \texttt{current} was incremented to \texttt{IDEQUE\_CHUNK}, which is an issue. Another way that a node may get removed is if \texttt{length} reaches zero. Back to the issue, if chunk size is reached than \texttt{current} index must be circled back.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-02, title=source/sequence/ideque.c]
+    // if deque's current index is equal to list chunk or deque is empty free head node
+    if ((IDEQUE_CHUNK == deque->current) || !(deque->length)) {
+\end{lstlisting}
+\end{minipage}
+
+This segment cuts off the \texttt{head} node through pointer list magic. it first saves the \texttt{head} so it doesn't roll off after the cut. Then head next's previous pointer points to tail and tail's next pointer points to head's next.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-03, title=source/sequence/ideque.c]
+        struct infinite_deque_node * head = deque->head; // temporary save pointer to head node
+
+        head->next->prev = head->prev; // set head next's previous pointer to tail/head's previous
+        head->prev->next = head->next; // set tail's next node to head's next node
+\end{lstlisting}
+\end{minipage}
+
+Deque's \texttt{head} gets either set to its \texttt{next} or \texttt{NULL} if \texttt{length} reaches zero. \texttt{current} is set to zero for recircled, and lastly head node is memory freed.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-04, title=source/sequence/ideque.c]
+        // if deque's size is zero then set head to NULL, else it's head's next node
+        deque->head = deque->length ? deque->head->next : NULL;
+        deque->current = 0; // reset current index to zero/beginning
+
+        deque->allocator->free(head, deque->allocator->arg); // free temporary head node
+    }
+}
+\end{lstlisting}
+\end{minipage}
 
