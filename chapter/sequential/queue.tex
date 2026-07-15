@@ -605,9 +605,9 @@ Each element can be accessed and manipulated through the special \texttt{each\_i
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-queue, title=include/sequence/iqueue.h]
 /// @brief Iterates over each element in structure starting from the beginning.
 /// @param queue Structure to iterate over.
-/// @param handle Function pointer to operate on each element reference using element size and generic arguments.
-/// @param ah Generic arguments to use in function pointer.
-void each_iqueue(iqueue_s const * const queue, handle_fn const handle, void * const ah);
+/// @param manage Function pointer to operate on each element reference using element size and generic arguments.
+/// @param am Generic arguments to use in function pointer.
+void each_iqueue(iqueue_s const * const queue, manage_fn const manage, void * const am);
 \end{lstlisting}
 \end{minipage}
 
@@ -623,7 +623,7 @@ Initially we need to save the remaining size as the queue's \texttt{length} and 
 \end{lstlisting}
 \end{minipage}
 
-The for loop iterates over each node and element until remaining size is zero. Since the first inserted element is stored in head the current node is inferred from the previous node's next reference. The secondary for loop just makes sure to begin iteration from the current index position in array and then continue from zero while elements are handled. The handle function is checked and ends the main \texttt{each\_iqueue} function when handle returns false.
+The for loop iterates over each node and element until remaining size is zero. Since the first inserted element is stored in head the current node is inferred from the previous node's next reference. The secondary for loop just makes sure to begin iteration from the current index position in array and then continue from zero while elements are managed. The manage function is checked and ends the main \texttt{each\_iqueue} function when manage returns false.
 
 \noindent
 \begin{minipage}{\linewidth}
@@ -635,8 +635,8 @@ The for loop iterates over each node and element until remaining size is zero. S
 
         size_t i = start; // save i outside loop to later use it in subtraction
         for (;i < remaining && i < IQUEUE_CHUNK; ++i) { // while i is less than either remaining size or node's array size
-            // handle on element and if zero is returned then end main function
-            if (!handle(current->elements + (i * queue->size), ah)) {
+            // manage on element and if zero is returned then end main function
+            if (!manage(current->elements + (i * queue->size), am)) {
                 return;
             }
         }

@@ -494,13 +494,13 @@ Each element can be accessed and manipulated through the special \texttt{each\_i
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack, title=include/sequence/istack.h]
 /// @brief Iterates over each element in structure starting from the beginning.
 /// @param stack Structure to iterate over.
-/// @param handle Function pointer to handle each element reference using generic arguments.
-/// @param ah Generic arguments to use in function pointer.
-void each_istack(istack_s const * const stack, handle_fn const handle, void * const ah);
+/// @param manage Function pointer to manage each element reference using generic arguments.
+/// @param am Generic arguments to use in function pointer.
+void each_istack(istack_s const * const stack, manage_fn const manage, void * const am);
 \end{lstlisting} 
 \end{minipage} 
 
-All the element are in an array, thus iterating over them is as simple as using an empty for loop one-liner. The \texttt{handle} function pointer, together with its \texttt{arguments}, allows direct access to the element, making manipulation is possible. If \texttt{handle} returns false, the iteration automatically stops, kinda like the \texttt{break} keyword in a classic for loop.
+All the element are in an array, thus iterating over them is as simple as using an empty for loop one-liner. The \texttt{manage} function pointer, together with its \texttt{arguments}, allows direct access to the element, making manipulation is possible. If \texttt{manage} returns false, the iteration automatically stops, kinda like the \texttt{break} keyword in a classic for loop.
 
 \noindent
 \begin{minipage}{\linewidth}
@@ -508,7 +508,7 @@ All the element are in an array, thus iterating over them is as simple as using 
 {
     // ...
     // iterate over each element from bottom to the top of stack
-    for (char * e = stack->elements; e < stack->elements + (stack->length * stack->size) && handle(e, ah); e += stack->size) {}
+    for (char * e = stack->elements; e < stack->elements + (stack->length * stack->size) && manage(e, am); e += stack->size) {}
 }
 \end{lstlisting}
 \end{minipage}
