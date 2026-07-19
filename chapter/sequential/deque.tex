@@ -878,6 +878,136 @@ Lastly, the {elements\_array} gets deallocated.
 \end{lstlisting}
 \end{minipage}
 
+\section{Example usages}
 
+Here are some example usages of the infinite deque. Each example show a deque of integers performing some of the functionalities mentioned in the previous section.
 
+\subsection{Creating, cleaning and destroying a deque}
 
+A simple program example which defines a destroy function pointer, creates an integer deque, clears and destroys the structure with the function pointer.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:deque-example-01]
+#include <sequence/ideque.h>
+
+void intdst(void * const element, void * null) {
+    (void)(null);
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
+}
+
+int main(void) {
+    ideque_s deque = create_ideque(sizeof(int));
+
+    // some operations
+
+    clear_ideque(&deque, intdst, NULL);
+    
+    // some new operations
+
+    destroy_ideque(&deque, intdst, NULL);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Enqueueing, peeking and dequeueing elements front and back}
+
+Example showing the usage of front and back enqueueing, dequeueing and peeking elements.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:deque-example-02]
+#include <stdio.h>
+#include <sequence/ideque.h>
+
+void intdst(void * const element, void * null) {
+    (void)(null);
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
+}
+
+int main(void) {
+    ideque_s deque = create_ideque(sizeof(int));
+
+    // enqueue front and back 10 elements
+    // 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+    for(int i = 0; i < 10; i++) {
+        enqueue_front_ideque(&deque, &i);
+        enqueue_back_ideque(&deque, &i);
+    }
+
+    // see if front and back elements are 9
+    int a = -1, b = -1;
+    peek_front_ideque(&deque, &a);
+    peek_back_ideque(&deque, &b);
+    printf("%d == %d\n\n", a, b);
+
+    // dequeue and print all elements
+    while(!is_empty_ideque(&deque)) {
+        dequeue_front_ideque(&deque, &a);
+        dequeue_back_ideque(&deque, &b);
+        printf("%d == %d\n", a, b);
+    }
+
+    destroy_ideque(&deque, intdst, NULL);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Iterating and sorting elements}
+
+Code shows how iteration works with printing each element in the deque in front and back order. After that, sorting is shown using qsort.
+
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:queue-example-03]
+#include <stdio.h>
+#include <stdlib.h>
+#include <sequence/ideque.h>
+
+void intdst(void * const element, void * null) {
+    (void)(null);
+    (*(int*)element) = 0; // to set to 0, or just use (void)(element);
+}
+
+int intrcmp(void * const a, void * const b) {
+    return (*(int*)b)  - (*(int*)a); // reverse comparison
+}
+
+bool intprt(void * const element, void * format) {
+    printf(format, (*(int*)element));
+    return true;
+}
+
+void intsrt(void * const array, size_t const length, void * const compare) {
+    qsort(array, length, sizeof(int), compare);
+}
+
+int main(void) {
+    ideque_s deque = create_ideque(sizeof(int));
+
+    // enqueue 10 elements
+    // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+    for(int i = 0; i < 10; i++) {
+        enqueue_back_ideque(&deque, &i);
+    }
+
+    // print each element from start to end in order
+    // prints: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+    each_front_ideque(&deque, intprt, "%d ");
+    putc('\n', stdout);
+    // prints: 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+    each_back_ideque(&deque, intprt, "%d ");
+
+    // sort elements in reverse
+    // YOU SHOULD NOT CAST A FUNCTION POINTERS INTO VOID*
+    // ARGUMENTS, THIS IS JUST A SILLY EXAMPLE, INSTEAD PUT
+    // THE FUNCTION POINTER INSIDE A STRUCT AND PUT THE
+    // INITIALIZED STRUCT POINTER ITSELF AS AN ARGUMENT
+    apply_ideque(&deque, intsrt, intrcmp);
+    putc('\n', stdout);
+
+    // print each element from start to end in reverse
+    // prints: 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+    each_front_ideque(&deque, intprt, "%d ");
+
+    destroy_ideque(&deque, intdst, NULL);
+
+    return 0;
+}
+\end{lstlisting}
