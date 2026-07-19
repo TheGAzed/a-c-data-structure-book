@@ -226,12 +226,13 @@ void clear_ideque(ideque_s * const deque, set_fn const destroy, void * const ad)
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-deque-01, title=source/sequence/ideque.c]
 {
     struct infinite_deque_node * current = deque->head; // save head index as current node
-    for (size_t start = deque->current; deque->length; start = 0) { // for every node in deque list until size is not zero
+    // for every node in deque list until size is not zero
+    for (size_t start = deque->current, remaining = deque->length; remaining; start = 0) {
         size_t i = start; // set i outside of nested for loop to save its value
-        for (; i < (deque->length + start) && i < IDEQUE_CHUNK; ++i) { // destroy each element in node
+        for (; i < (remaining + start) && i < IDEQUE_CHUNK; ++i) { // destroy each element in node
             destroy(current->elements + (i * deque->size), ad);
         }
-        deque->length -= (i - start); // subtract absolute value of i and start from deque's size
+        remaining -= (i - start); // subtract absolute value of i and start from deque's size
 
         struct infinite_deque_node * temp = current; // save current node as temporary to free later
         current = current->next; // go to next node
@@ -509,7 +510,7 @@ The dequeue, unlike the enqueue, removes the front element from the deque, but l
 
 \noindent
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque, title=include/sequence/ideque.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-front-deque, title=include/sequence/ideque.h]
 /// @brief Dequeues a single element from the front of the structure.
 /// @param deque Structure to dequeue from.
 /// @param buffer Element buffer to save dequeue.
@@ -521,7 +522,7 @@ Now the front-most element gets saved to the buffer and \texttt{current} increme
 
 \noindent
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-01, title=source/sequence/ideque.c]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-front-deque-01, title=source/sequence/ideque.c]
 {
     // ...
     memcpy(buffer, deque->head->elements + (deque->current * deque->size), deque->size);
@@ -534,7 +535,7 @@ Next up, if a node becomes empty and needs to be removed, an if condition checks
 
 \noindent
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-02, title=source/sequence/ideque.c]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-front-deque-02, title=source/sequence/ideque.c]
     // if deque's current index is equal to list chunk or deque is empty free head node
     if ((IDEQUE_CHUNK == deque->current) || !(deque->length)) {
 \end{lstlisting}
@@ -544,7 +545,7 @@ This segment cuts off the \texttt{head} node through pointer list magic. it firs
 
 \noindent
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-03, title=source/sequence/ideque.c]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-front-deque-03, title=source/sequence/ideque.c]
         struct infinite_deque_node * head = deque->head; // temporary save pointer to head node
 
         head->next->prev = head->prev; // set head next's previous pointer to tail/head's previous
@@ -556,7 +557,7 @@ Deque's \texttt{head} gets either set to its \texttt{next} or \texttt{NULL} if \
 
 \noindent
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-04, title=source/sequence/ideque.c]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-front-deque-04, title=source/sequence/ideque.c]
         // if deque's size is zero then set head to NULL, else it's head's next node
         deque->head = deque->length ? deque->head->next : NULL;
         deque->current = 0; // reset current index to zero/beginning
@@ -566,4 +567,317 @@ Deque's \texttt{head} gets either set to its \texttt{next} or \texttt{NULL} if \
 }
 \end{lstlisting}
 \end{minipage}
+
+\subsection{Dequeue deque back}
+
+Dequeue back dequeues an element from the back of the deque and saves removed element into \texttt{buffer}. The back is defined as a position formula \(current + (length - 1)\) modulo to single chunk size.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque, title=include/sequence/ideque.h]
+/// @brief Dequeues a single element from the back of the structure.
+/// @param deque Structure to dequeue from.
+/// @param buffer Element buffer to save dequeue.
+void dequeue_back_ideque(ideque_s * const deque, void * const buffer);
+\end{lstlisting}
+\end{minipage}
+
+Initially, the deque length is decreased to represent both removal and for the back position calculation. The position itself is represented by \texttt{back\_index}, which is used to copy the back element into buffer.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    deque->length--; // decrement only size since it's removing from the back
+    size_t const back_index = (deque->current + deque->length) % IDEQUE_CHUNK; // calculate back element's index
+    memcpy(buffer, deque->head->prev->elements + (back_index * deque->size), deque->size);
+\end{lstlisting}
+\end{minipage}
+
+If deque is empty, that means only the head/tail node remain as one. Thus the only thing required is the free-up of the node's memory followed by setting the \texttt{current} and \texttt{head} deque struct members to zero/NULL for simpler future enqueues. If length is zero, then \texttt{back\_index} may not be zero and it is a special 'remove node' case.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-02, title=source/sequence/ideque.c]
+    if (!deque->length) {
+        deque->allocator->free(deque->head, deque->allocator->arg); // free head node
+
+        deque->current = 0; // reset current index to 0 if deque is empty
+        deque->head = NULL;
+\end{lstlisting}
+\end{minipage}
+
+The first if is continued by an \texttt{else if} statement, which checks if \texttt{back\_index} is zero, representing the removal of the last element in the node array. This requires freeing up the empty node and return unused memory back to the system. Since this node is the last node in the deque it is saved as a temporary \texttt{tail} for later freeing. Next the tail node is cut off with tail's previous node, and tail's previous node is made to point to deque's head instead of \texttt{tail}. The tail thus becomes lost in the deque, hence it was temporary saved, and all that is left is to free is with the allocator.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:dequeue-back-deque-03, title=source/sequence/ideque.c]
+    } else if (!back_index) { // if current index at back is zero or deque is empty remove empty tail/head
+        struct infinite_deque_node * tail = deque->head->prev; // temporary save pointer to head node
+
+        deque->head->prev = tail->prev; // head's tail pointer equals tail's previous
+        tail->prev->next = deque->head; // tail previous' next equals head
+
+        deque->allocator->free(tail, deque->allocator->arg); // free temporary tail node
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Peek deque front}
+
+Peeks the front element in the deque at deque's \texttt{current} position.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:peek-front-deque, title=include/sequence/ideque.h]
+/// @brief Peeks a single element from the front of the structure.
+/// @param deque Structure to peek.
+/// @param buffer Element buffer to save peek.
+void peek_front_ideque(ideque_s const * const deque, void * const buffer);
+\end{lstlisting}
+\end{minipage}
+
+The peeked element is saved into \texttt{buffer} without any removal.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:peek-front-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    memcpy(buffer, deque->head->elements + (deque->current * deque->size), deque->size);
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Peek deque back}
+
+Peeks the back element in the deque at deque's \((current + (length - 1)) \bmod chunk\) position.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:peek-back-deque, title=include/sequence/ideque.h]
+/// @brief Peeks a single element from the back of the structure.
+/// @param deque Structure to peek.
+/// @param buffer Element buffer to save peek.
+void peek_back_ideque(ideque_s const * const deque, void * const buffer);
+\end{lstlisting}
+\end{minipage}
+
+A \texttt{back\_index} is calculated using the aforementioned formula and element is copied from tail (head's previous) position into \texttt{buffer}. The element is not removed.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:peek-back-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    // calculate back element's location/index and copy it into buffer
+    size_t const back_index = (deque->current + deque->length - 1) % IDEQUE_CHUNK;
+    memcpy(buffer, deque->head->prev->elements + (back_index * deque->size), deque->size);
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Each deque front}
+
+Each element is iterated in front-to-back order using user-defined \texttt{manage} function pointer and its \texttt{am} arguments.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-front-deque, title=include/sequence/ideque.h]
+/// @brief Iterates over each element in structure starting from the front.
+/// @param deque Structure to iterate over.
+/// @param manage Function pointer to operate on each element reference using element size and arguments.
+/// @param am Generic arguments to use in function pointer.
+void each_front_ideque(ideque_s const * const deque, manage_fn const manage, void * const am);
+\end{lstlisting}
+\end{minipage}
+
+A \texttt{current} node variable is set to deque's head in order to be later iterated inside a for loop. Next, a similar approach to destroy/clear deque is used to iterate through each node and its array elements until \texttt{remaining} unvisited elements count reaches zero. Also, a \texttt{start} variable is set to the \texttt{current} deque position for the special head node case where the \texttt{current} position may not lay at zero, while other nodes have the first element at zero.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-front-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    struct infinite_deque_node * current = deque->head; // save head node as current pointer
+    // while remaining size is not zero
+    for (size_t start = deque->current, remaining = deque->length; remaining; start = 0) {
+\end{lstlisting}
+\end{minipage}
+
+A nested for loop is iterating through each node array element starting at \texttt{start}. Inside the loop the \texttt{manage} function pointer is called with the \texttt{current} node element at \texttt{i} index and \texttt{am} arguments. The reason \texttt{i} is saved outside the for loop is to later subtract it from the \texttt{remaining} unvisited element count. Lastly, the \texttt{current} node is updated with its next sibling to continue the next iteration.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-front-deque-02, title=source/sequence/ideque.c]
+        size_t i = start;
+        for (; i < (remaining + start) && i < IDEQUE_CHUNK; ++i) { // operate on each element in node
+            // if operate returns false then terminate main function
+            if (!manage(current->elements + (i * deque->size), am)) {
+                return;
+            }
+        }
+
+        remaining -= (i - start); // decrement remaining size by operated size of current node
+        current = current->next; // go to next node
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Each deque back}
+
+Each element is iterated in back-to-front order using user-defined \texttt{manage} function pointer and its \texttt{am} arguments.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-back-deque, title=include/sequence/ideque.h]
+/// @brief Iterates over each element in structure starting from the back.
+/// @param deque Structure to iterate over.
+/// @param manage Function pointer to operate on each element reference using element size and arguments.
+/// @param am Generic arguments to use in function pointer.
+void each_back_ideque(ideque_s const * const deque, manage_fn const manage, void * const am);
+\end{lstlisting}
+\end{minipage}
+
+A \texttt{current} node is defined as the deque head, then a \texttt{remaining} size is defined as the deque's length to represent the count of unvisited elements. Next a \texttt{last} index variable is defined to access the last element in the whole structure (not relative to chunk).
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-back-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    struct infinite_deque_node * current = deque->head; // save head node as current pointer
+    for (size_t remaining = deque->length, last = deque->current + deque->length - 1; remaining;) {
+\end{lstlisting}
+\end{minipage}
+
+Inside the for loop, the current node is updated to its previous node to both start at the tail node and to iterate through the deque in reverse. Later a \texttt{next\_index} is defined to access the node's elements relative to \texttt{IDEQUE\_CHUNK} size. An \texttt{i} index is defined outside another for loop which iterates over each element in node array in reverse. The inner for loop checks if \texttt{i} is less than or equal to \texttt{node\_index} (yes, equal to, because \texttt{node\_index} is a zero-based index \texttt{i} must be equal to, and not a length). The for loop also checks if any \texttt{remaining} elements exist, at the end, the loop increments \texttt{i} and decrements \texttt{remaining}. 
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-back-deque-02, title=source/sequence/ideque.c]
+        current = current->prev; // fist go to tail and other previous nodes
+
+        size_t const node_index = last % IDEQUE_CHUNK; // calculate last element index in node
+        size_t i = 0; // save number of operated elements in node
+\end{lstlisting}
+\end{minipage}
+
+Inside the inner for loop, the \texttt{manage} function pointer is called for each element in reverse of \texttt{i}, as \(node\_index - i\).
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-back-deque-03, title=source/sequence/ideque.c]
+        for (; i <= node_index && remaining; ++i, remaining--) { // until node index is reached and elements remain
+            // manage on reversed i to start from last element in node
+            if (!manage(current->elements + ((node_index - i) * deque->size), am)) {
+                return;
+            }
+        }
+        last -= i; // may underflow
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Apply deque}
+
+Turns the deque into an array which the user can manipulate, like sort the elements for example, and the 'changed' array is saved back into the deque. Can also be treated like a continuous buffer for printing or more cache friendly elements access as oppose to the \texttt{each} functions.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-deque, title=include/sequence/ideque.h]
+/// @brief Apply each element in structure into an array to manage.
+/// @param deque Structure to map.
+/// @param process Function pointer to manage array of elements using structure length, element size and arguments.
+/// @param ap Generic arguments to use in function pointer.
+void apply_ideque(ideque_s const * const deque, process_fn const process, void * const ap);
+\end{lstlisting}
+\end{minipage}
+
+Since the deque does not save all element into as a continuous array, the function first allocates an \texttt{elements\_array} of \((length \times size)\) size.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-deque-01, title=source/sequence/ideque.c]
+{
+    // ...
+    // create elements array to temporary save doubly linked list elements into straight array
+    char * elements_array = deque->allocator->alloc(deque->length * deque->size, deque->allocator->arg);
+\end{lstlisting}
+\end{minipage}
+
+Next the temporary \texttt{elements\_array} is initialized with the elements from the deque using the same front-to-back iteration for loop approach, explained in \texttt{destroy\_ideque}, thus also in \texttt{clear\_ideque}, and \texttt{each\_front\_ideque}. An \texttt{index} variable is used to properly save elements into the \texttt{elements\_array} in zero-based index order.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-deque-02, title=source/sequence/ideque.c]
+    // index increments after getting each element from node
+    // remaining count of elements is calculated
+    // copying starts from head
+    size_t index = 0, remaining = deque->length;
+    struct infinite_deque_node * current = deque->head;
+    // set start to current and then begin from 0 for all the other elements in array node
+    for (size_t start = deque->current; remaining; start = 0) {
+        size_t i = start; // temporary save iterator outside for later subtraction
+
+        // copy elements starting from start until either 'relative remaining' or 'array node' size is reached
+        for (; i < (remaining + start) && i < IDEQUE_CHUNK; ++i) {
+            memcpy(elements_array + (index * deque->size), current->elements + (i * deque->size), deque->size);
+            index++;
+        }
+
+        remaining -= (i - start); // subtract copied count from remaining size
+        current = current->next; // go to next node
+    }
+\end{lstlisting}
+\end{minipage}
+
+After the \texttt{elements\_array} is initialized, the \texttt{process} function pointer is called and the array gets processed by the user function together with \texttt{length} and \texttt{ap} arguments as parameters.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-deque-03, title=source/sequence/ideque.c]
+    process(elements_array, deque->length, ap);
+\end{lstlisting}
+\end{minipage}
+
+Then the \texttt{index} parameter is reset to zero and the \texttt{elements\_array} elements are saved back into the deque structure using the same deque iteration algorithm.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-deque-03, title=source/sequence/ideque.c]
+    // reset index and remaining and copy back elements from array into each node array
+    index = 0, remaining = deque->length, current = deque->head;
+    // set start to current and then begin from 0 for all the other elements in array node
+    for (size_t start = deque->current; remaining; start = 0) {
+        size_t i = start; // temporary save iterator outside for later subtraction
+
+        // copy elements starting from start until either 'relative remaining' or 'array node' size is reached
+        for (; i < (remaining + start) && i < IDEQUE_CHUNK; ++i) {
+            memcpy(current->elements + (i * deque->size), elements_array + (index * deque->size), deque->size);
+            index++;
+        }
+
+        remaining -= (i - start); // subtract copied count from remaining size
+        current = current->next; // go to next node
+    }
+\end{lstlisting}
+\end{minipage}
+
+Lastly, the {elements\_array} gets deallocated.
+
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-deque-03, title=source/sequence/ideque.c]
+    deque->allocator->free(elements_array, deque->allocator->arg);
+}
+\end{lstlisting}
+\end{minipage}
+
+
+
 
