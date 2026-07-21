@@ -1,10 +1,12 @@
 \chapter{Stacks} \label{ch:stack}
 
-Lets imagine we have a stack of books. The normal way we can add books to the stack is by putting them at the top, if we put a book with the cover pointing upwards one also knows what book exactly is at the top. To remove a book we just grab the top one and put it somewhere else.
+So, just imagine we have a stack of books. The normal way we can add books to the stack is by putting each one to the top, if we put a book with the cover pointing upwards, one also knows what exact book is at the top. To remove a book, just grab the top one and put it somewhere else.
 
-By making space for another stack of books and adding all the books from the first one, while the constrains of putting and removing still remain, we get a new stack, but with a specific property that, when compared with the initial one, makes us tilt our head (literally). The new stack is just like the last one, but with the books in opposite order. This little property allows us to invert the order of any linear ordering of elements without knowing how they're implemented, with just adding and removing of elements.
+By making space for another stack of books and adding all the books from the first stack, while the constrains of putting and removing still remain, we get a new stack, but with a specific property that, when compared with the initial one, makes us tilt our head (literally). The new stack is just like the last one, but with the books in opposite order. This little property allows us to invert the order of any linear ordering of elements without knowing how they're implemented, by just adding and removing elements.
 
-Continuing with the two stack analogy, what if, instead of books we stored a game of chess. By adding these moves one-by-one (see \autoref{fig:chess-moves}): E2-E4, E7-E5, G1-F3, B8-C6, D2-D4, E5-D4, F3-D4, F8-C5, C2-C3, D8-F6, D4-C6, F6-F2; we get probably the funniest chess game in modern history \footnote{that can be watched via \url{https://www.youtube.com/watch?v=e91M0XLX7Jw}}. And on top of that if we remove the two moves from the top and reset the pieces (F6-F2 becomes F2-F6), iteratively it is possible to return to the initial state of the game, see \autoref{fig:chess-stack}. And to top it all of, as probably every data structure book and article about stacks writes this mechanism is used by search engines when you want to return to the previous pages, including back and forth traversal.
+Continuing with the two-stack analogy, what if, instead of books we stored a game of chess. By adding these moves one-by-one (see \autoref{fig:chess-moves}): E2-E4, E7-E5, G1-F3, B8-C6, D2-D4, E5-D4, F3-D4, F8-C5, C2-C3, D8-F6, D4-C6, F6-F2; we get probably the funniest chess game in modern history \footnote{that can be watched via \url{https://www.youtube.com/watch?v=e91M0XLX7Jw}}. And on top of that, if we remove the two moves from the top and reset the pieces (F6-F2 becomes F2-F6), iteratively, it is possible to return to the initial state of the game, see \autoref{fig:chess-stack}.
+
+Let me not forget to mention this - probably every data structure book and article about stacks describing this mechanism also mentions that search engines allow you to return to the previous pages, including back and forth traversal, with stacks alone.
 
 \begin{figure}
     \centering
@@ -20,7 +22,7 @@ Continuing with the two stack analogy, what if, instead of books we stored a gam
     \label{fig:chess-stack}
 \end{figure}
 
-Stacks are also used to store function calls in programming languages like C to be able to know to what previous in memory place the program should go to after the top function returns.
+Stacks are also used to store function calls in programming languages like C, to be able move to the previous place in memory the program should go to after the top function finishes.
 
 \section{Implementations of a Stack}
 
@@ -35,7 +37,7 @@ Every computer science student learns that the two most common ways to implement
 
 \subsection{The humble linked list}
 
-For a more in-depth explanation of lists you can go to \autoref{pt:two}'s lists, but in short a linked list is a linear data structure which allows us to store data sequentially as well as store a reference to the next data item, like in \autoref{fig:linked-list}.
+For a more in-depth explanation of lists you can go visit and \autoref{pt:two}'s list chapter, but in short, a linked list is a linear data structure, which allows us to store data sequentially as well as store a reference to the next data item, like in \autoref{fig:linked-list}.
 
 \begin{figure}
     \centering
@@ -44,59 +46,59 @@ For a more in-depth explanation of lists you can go to \autoref{pt:two}'s lists,
     \label{fig:linked-list}
 \end{figure}
 
-The linked list consists of two special nodes which represent the beginning and the end - head and tail. Most linked list implementation will store the reference to the head, so it is generally easy to access the first element as oppose to the tail, where the user needs to follow all the arrows until they reach it.
+The linked list consists of two special, nodes which represent the beginning and the end - the head and the tail. Most linked list implementations will store the reference to the head, so it is generally easy to access the first element as oppose to the tail, where the user needs to follow all the arrows until they reach it.
 
-Adding, removing and accessing the first top node only requires a reference to the head, shown in \autoref{fig:linked-list-push-pop}. Adding is just creating a new node, then making its reference point to the stack list's head, and lastly we change the head itself into the new node. Removal is storing the top node, then change stack's head to the next reference (head's next node), and destroying the removed node.
+Adding, removing and accessing the first (top of the stack) node only requires a reference to the head, as shown in \autoref{fig:linked-list-push-pop}. Adding is just creating a new node, then making its reference point to the stack list's head, and lastly changing the head itself into the new node. Removal is storing the top node, then changing stack's head to the next reference (head's next node), and destroying the removed node.
 
 \begin{figure}
     \centering
     \includegraphics[width=1.0\textwidth]{figures/stack/linked-list-push-pop}
-    \caption{Pushing element 'H' to the top of a linked list stack and creating 'HI' (left), and then removing it (right).}
+    \caption{Pushing element 'H' to the top of a linked list stack and creating 'HI' (left), then removing 'H' (right).}
     \label{fig:linked-list-push-pop}
 \end{figure}
 
 \subsection{The prideful array}
 
-The linked list is kinda complicated, and compared to our initial book analogy there's a better way to represent stacks - arrays. Another problem is cache locality, which makes linked list stacks slower since elements may be stored huge memory distances away and loading them to faster, but smaller, memory areas for speed may be impossible. On the other hand, there are some improvements that can be made even with lists, but back to the topic.
+The linked list is kinda complicated, and compared to our initial book analogy there's a better way to represent stacks - through arrays. Another problem is cache locality, which makes linked list stacks slower since elements may be stored huge memory distances away and loading them to faster, but smaller, memory areas for speed may be too slow. On the other hand, there are some improvements that can be made even with lists, but back to the topic.
 
 An array is just a linear data structure made up of continuous memory. This simple concept makes it one of the most versatile data structures in all of programming.
 
-Adding, removing and accessing the first top node only requires a numerical index value that can be inferred through the stack's length We just store the \(LENGTH\) of the stack, then add an element by putting it into the \(INDEX = LENGTH\) and incrementing \(LENGTH\) by one; removing an element requires decrementing \(LENGTH\) by one and making \(INDEX = LENGTH\). Just don't forget to check if a stack's maximum length is less than maximum/capacity size during the push; and length not being zero while popping. Accessing the topmost element is just \(INDEX = LENGTH - 1\), without the decrement (see \autoref{fig:array}).
+Adding, removing and accessing the first top node only requires a numerical index value that can be inferred through the stack's length. We just store the \texttt{length} of the stack, then add an element by putting it into the \(index = length\) and incrementing \texttt{length} by one; removing an element requires decrementing \texttt{length} by one and making \(index = length\). Just don't forget to check if a stack's maximum length is less than maximum/capacity size during the push; and length not being zero while popping. Accessing the topmost element is just \(index = length - 1\), without the decrement (see \autoref{fig:array}).
 
-The biggest concern is that arrays aren't infinite and if we want to add an arbitrary number of elements we need to expand it - if we have space then we simply increase the capacity value, one must also store a changing capacity value for dynamically growing arrays and a constant maximum for static ones; else if the array occupies the maximum available chunk of memory all elements must be moved to a bigger chunk; and when that fails, because no chunk exists, everything's screwed and we must terminate.
+The biggest concern is that arrays aren't infinite and if we want to add an arbitrary number of elements we need to expand it - if we have space then we simply increase the capacity value, one must also store a changing capacity value for dynamically growing arrays and a constant maximum for static ones; else if the array occupies the maximum available chunk of memory all elements must be moved to a bigger chunk; and when that fails, because no such chunk exists, everything's screwed and we must terminate.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.75\textwidth]{figures/stack/array}
-    \caption{A simple graphical array example. The top element is also the last element in the array.}
+    \caption{A simple graphical array example. The top element 'O' is also the last element in the array.}
     \label{fig:array}
 \end{figure}
 
 \subsection{Singly linked list of array elements}
 
-Combine the best of humbleness with pride and you get this. It's just a linked list, see \autoref{fig:stack-list-array}, but the node is actually made up of an array of elements instead of just a singleton. A mathematical person may say that the previous implementations are but a simple subset of this superset of a stack structure, but i digress. 
+Combine the best of humbleness with pride and you get this. It's just a linked list, see \autoref{fig:stack-list-array}, but the node is actually made up of an array of elements instead of just a singleton. A mathematical person may say that the previous implementations are but a simple subset of this superset of THE computer science stack, but i digress.
 
-The main benefit is that the list-array works like a array when accessing elements; and like a list when shortening/expanding it (we don't need to resize an array, only add a new node to the top). Adding and removing elements just combines the array method until full/empty, where it then performs the list operations. In hindsight, the implementation is more like a compromise than the best of both worlds.
+The main benefit is that the list-array works like an array when accessing elements; and like a list when shortening/expanding it (we don't need to resize an array, only add a new node to the top). Adding and removing elements just combines the array approach, until the array is full/empty, where it then performs the list operations. In hindsight, the list-array implementation is more like a compromise than the best of both worlds.
 
-To get the top element we can store the total element count as \(LENGTH\), then simply getting the head node gives us access to the array with the top element so that lastly we only need to do \(INDEX = (LENGTH - 1) \bmod CHUNK\), where \(CHUNK\) is the node's array size.
+To get the top element we can store the total element count as \texttt{length}, then simply getting the head node gives us access to the array with the top element, so that lastly we only need to do \(index = (length - 1) \bmod chunk\), where \texttt{chunk} is the node's array size.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.7\textwidth]{figures/stack/list-array}
-    \caption{Graphical example of singly linked list of arrays. The top element is the last element in the head node's array.}
+    \caption{Graphical example of singly-linked list of arrays. The top element is the last element in the head node's array.}
     \label{fig:stack-list-array}
 \end{figure}
 
 \section{Array stack structure code}
 
-At the end I have decided to pick simple array-based stacks for one simple reason - continuous memory layout. I want to allow users to sort elements in the stack in order the have the same functionality as a priority queue, i.e. retrieving elements based on a priority, like the minimum. Of course the priority would be in reverse since the stack would get the last/top element in the array. It is possible to sort elements using the aforementioned implementations, but that requires creating a temporary array to copy elements back and forth. The next chapters of this part will use linked list restricted sequential structures. In \autoref{ch:deque} the double ended queue data structure, which is implemented like a list of arrays, can also be used as a stack alternative with the list-array advantages.
+At the end I have decided to pick the array-based stack for one simple reason - continuous memory layout. I want to allow users to sort elements in the stack in order to have the same functionality as a priority queue, i.e. retrieving elements based on a priority, like the minimum (smallest) element. Of course the priority would be in reverse since the stack would get the last/top element in the array. It is possible to sort elements using the list and array-list implementations, but that requires creating a temporary array to copy elements back and forth. 
+
+The next chapters of this part will implement linked list restricted sequential structures. In \autoref{ch:deque} the double ended queue data structure, which is implemented like a list of arrays, can also be used as a stack alternative with the list-array memory advantages.
 
 \subsection{The infinite stack structure}
 
-The \texttt{istack} code uses a dynamic array of elements based on a user-defined size for a singular element, for example using \texttt{sizeof} on \texttt{int}. The three members \texttt{size}, \texttt{length} and \texttt{capacity} represent single element size, current stack length and maximum capacity before resizing is required, respectively. Lastly, the memory allocator allocates, reallocates and frees the elements array and other temporary structures used in certain functionalities.
+The \texttt{istack} code uses a dynamic array of elements based on a user-defined size for a singular element, for example using \texttt{sizeof} on \texttt{int}. The three members \texttt{size}, \texttt{length} and \texttt{capacity} represent single element size, current stack length and maximum capacity before resizing is required. The memory allocator allocates, reallocates and frees the elements array, and other temporary structures used in some functionalities.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:stack, title=include/sequence/istack.h]
 /// @brief Infinite stack data structure.
 typedef struct infinite_stack {
@@ -105,26 +107,20 @@ typedef struct infinite_stack {
     memory_s const * allocator;
 } istack_s;
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Resize stack}
 
 Infinite expansion and shrinking require the understanding of reallocating memory and implementation of the \texttt{\_istack\_resize} function.
 
-\noindent
-\begin{minipage}{\linewidth}
-\begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-stack, title=include/sequence/istack.h]
+\begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-stack, title=include/sequence/istack.c]
 /// @brief Resizes (reallocates) stack parameter arrays based on changed capacity.
 /// @param stack Structure to resize.
 /// @param size New size.
 void _istack_resize(istack_s * const stack, size_t const size);
 \end{lstlisting}
-\end{minipage}
 
-The function calls the allocator's \texttt{realloc} when high- and low-end capacity is reached while preserving minimum chunk length.
+The function calls on the allocator's \texttt{realloc} when high- and low-end capacity is reached, thus preserving minimum chunk length.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:resize-stack-01, title=source/sequence/istack.c]
 {
     stack->capacity = size;
@@ -133,40 +129,31 @@ The function calls the allocator's \texttt{realloc} when high- and low-end capac
     // ...
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Create stack}
 
 The \texttt{create\_istack} function creates an empty infinite stack structure storing the element size and allocator.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-stack, title=include/sequence/istack.h]
 /// @brief Creates an empty structure.
 /// @param size Size of a single element.
 /// @return Stack structure.
 istack_s create_istack(size_t const size);
 \end{lstlisting}
-\end{minipage}
 
 The creation process uses a compound literal to quickly create and return a new infinite stack structure. It only needs to set the single element \texttt{size} and \texttt{allocator} members.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:create-stack-01, title=source/sequence/istack.c]
 {
     // ...
     return (istack_s) { .size = size, .allocator = &standard };
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Make stack}
 
 The \texttt{make\_istack} function, similar to \texttt{create\_istack}, creates an infinite stack structure, but with the ability to specify a custom memory allocator.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:make-finite-stack, title=include/sequence/istack.h]
 /// @brief Creates a custom empty structure.
 /// @param size Size of a single element.
@@ -174,26 +161,20 @@ The \texttt{make\_istack} function, similar to \texttt{create\_istack}, creates 
 /// @return Stack structure.
 istack_s make_istack(size_t const size, memory_s const * const allocator);
 \end{lstlisting}
-\end{minipage}
 
-The code is basically the same as the aforementioned function, but with the \texttt{standard} allocator replaced with the parameter one.
+The code is basically the same as the aforementioned function, but with \texttt{standard} allocator replaced by the parameter one.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:make-stack-01, title=source/sequence/istack.c]
 {
     // ...
     return (istack_s) { .size = size, .allocator = allocator };
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Destroy stack}
 
-Next, \texttt{destroy\_istack} destroys the stack and all its elements while at the same time making it invalid for future usage. The parameters include a pointer to the stack, a function pointer taking in each element and function pointer's arguments, allowing the user to manipulate elements prior to their destruction. The \texttt{destroy()} function pointer can primarily be used to free memory, like strings, from the heap.
+The \texttt{destroy\_istack} destroys the stack and all its elements while at the same time making it invalid for future use. The parameters include a pointer to the stack, a function pointer taking in each element, and the function pointer's arguments, allowing the user to manipulate elements prior to their destruction. The \texttt{destroy} function pointer can be used to free memory, like strings, from the heap.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-stack, title=include/sequence/istack.h]
 /// @brief Destroys a structure and its elements, but makes it unusable.
 /// @param stack Structure to destroy.
@@ -201,12 +182,9 @@ Next, \texttt{destroy\_istack} destroys the stack and all its elements while at 
 /// @param ad Arguments for destroy function pointer.
 void destroy_istack(istack_s * const stack, set_fn const destroy, void * const ad)
 \end{lstlisting}
-\end{minipage}
 
-Since our elements are stored in an array, i.e. continuous memory, it is possible to write a for loop with a pointer representing a single element to call the \texttt{destroy()} function pointer on. The variable then gets incremented by the specified size until the last valid memory address is reached.
+Since our elements are stored in an array, i.e. continuous memory, it is possible to write a for loop with a pointer representing a single element to call the \texttt{destroy} function pointer on. The variable then gets incremented by the specified size until the last valid memory address is reached.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-stack-01, title=source/sequence/istack.c]
 {
     // ...
@@ -216,40 +194,30 @@ Since our elements are stored in an array, i.e. continuous memory, it is possibl
     }
     // ...
 \end{lstlisting}
-\end{minipage}
 
 After destroying each element the next step is to free the element's array using the specified \texttt{allocator} struct member.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-stack-02, title=source/sequence/istack.c]
     // ...
     stack->allocator->free(stack->elements, stack->allocator->arg); // free elements array
     // ...
 \end{lstlisting}
-\end{minipage}
 
 All that's left is to invalidate the stack, or set everything to zero, via calling \texttt{memset} from \texttt{<string.h>}.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:destroy-stack-03, title=source/sequence/istack.c]
     // ...
     memset(stack, 0, sizeof(istack_s));
 }
 \end{lstlisting}
-\end{minipage}
 
-The \texttt{memset} function allows us to effectively set every member of a struct or any array to zero. It should only be used to set values to either all zero or all one (by using \texttt{-1} for the second out of three parameters).
+The \texttt{memset} function allows us to effectively set every member of a struct or any array to zero. It should only be used to set values to either all zero or all one (by using \texttt{-1} through memset's second parameter).
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:memset,caption={The \texttt{memset} function prototype.}]
 #include <string.h>
 
 void *memset(void s[n], int c, size_t n);
 \end{lstlisting}
-\end{minipage}
 
 \begin{infobox}[title=Linux manual page - memset(3)]
 The \texttt{memset()} function fills the first n bytes of the memory area pointed to by s with the constant byte c.
@@ -257,10 +225,8 @@ The \texttt{memset()} function fills the first n bytes of the memory area pointe
 
 \subsection{Clear stack}
 
-Similar to \texttt{destroy\_istack}, \texttt{clear\_istack} can be used to destroy each element in our structure, but the stack remains valid for next use.
+Resembling \texttt{destroy\_istack}, \texttt{clear\_istack} can also be used to destroy each element in our structure, but the stack remains valid for future use.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-stack, title=include/sequence/istack.h]
 /// @brief Clears a structure and destroys its elements, but remains usable.
 /// @param stack Structure to destroy.
@@ -268,12 +234,9 @@ Similar to \texttt{destroy\_istack}, \texttt{clear\_istack} can be used to destr
 /// @param ad Arguments for destroy function pointer.
 void clear_istack(istack_s * const stack, set_fn const destroy, void * const ad);
 \end{lstlisting}
-\end{minipage}
 
-This is achieved by freeing the elements array and setting the stack's length and capacity to zero, and elements array NULL.
+This is achieved by freeing the elements array and setting the stack's length and capacity to zero, and elements array to \texttt{NULL}.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:clear-stack-01, title=source/sequence/istack.c]
 {
     // for each element in elements array call destroy
@@ -287,20 +250,16 @@ This is achieved by freeing the elements array and setting the stack's length an
     stack->elements = NULL;
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Copy stack}
 
-Creating a copy can be done with the \texttt{copy\_istack} function. The function pointer's functionality is similar to the \texttt{memcpy} function in \texttt{<string.h>}, which takes a destination address, source address, and the size of the memory area to copy, see \ref{lst:memcpy}. However, the function pointer parameter also takes in \texttt{create\_istack}'s last argument parameter.
+Creating a copy can be done with the \texttt{copy\_istack} function. The function pointer's functionality is similar to the \texttt{memcpy} function in \texttt{<string.h>}, which takes a destination address, source address, and the size of the memory area to copy, see \ref{lst:memcpy}. However, the \texttt{copy} function pointer takes in \texttt{create\_istack}'s last parameter as its third own parameter.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:memcpy, caption={The \texttt{memcpy} function prototype from the Linux/UNIX manual page.}]
 #include <string.h>
 
 void *memcpy(void dest[restrict n], const void src[restrict n], size_t n);
 \end{lstlisting}
-\end{minipage}
 
 \begin{infobox}[title=Linux manual page - memcpy(3)]
 The \texttt{memcpy()} function copies n bytes from memory area \texttt{src} to
@@ -308,8 +267,6 @@ memory area \texttt{dest}. The memory areas must not overlap. Use
 \texttt{memmove(3)} if the memory areas do overlap.
 \end{infobox}
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-stack, title=include/sequence/istack.h]
 /// @brief Creates a copy of a structure and all its elements.
 /// @param stack Structure to copy.
@@ -318,12 +275,9 @@ memory area \texttt{dest}. The memory areas must not overlap. Use
 /// @return Stack structure.
 istack_s copy_istack(istack_s const * const stack, copy_fn const copy, void * const ac);
 \end{lstlisting}
-\end{minipage}
 
-First and foremost, a replica stack structure is created and initialized, with all members except the elements array being directly copied. Then the original \texttt{allocator} is used to generate a memory array.
+First and foremost, a replica stack structure is created and initialized, with all members, except the elements array, being directly copied. Then the original \texttt{allocator} is used to generate a memory array.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-finite-stack-code-01, title=source/sequence/istack.c]
 {
     // ...
@@ -334,12 +288,9 @@ First and foremost, a replica stack structure is created and initialized, with a
     };
     // ...
 \end{lstlisting}
-\end{minipage}
 
-All elements are later copied individually from source stack's memory at index position into replica's elements array.
+All elements are later copied individually from source stack's memory at \texttt{offset} index position into replica's elements array.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:copy-finite-stack-code-02, title=source/sequence/istack.c]
     // initialize replica's elements array with stack's elements
     for (size_t i = 0; i < stack->length; ++i) {
@@ -350,50 +301,38 @@ All elements are later copied individually from source stack's memory at index p
     return replica;
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Is empty stack}
 
 Since we can't remove elements from an empty stack, the function available to aid us in this endeavor is the \texttt{is\_empty\_istack}. It only returns a negated length.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:is-empty-stack, title=include/sequence/istack.h]
 /// @brief Checks if structure is empty.
 /// @param stack Structure to check.
 /// @return 'true' if empty, 'false' if not.
 bool is_empty_istack(istack_s const * const stack);
 \end{lstlisting}
-\end{minipage}
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:is-empty-stack-01, title=source/sequence/istack.c]
 {
     // ...
     return !(stack->length);
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Push to stack}
 
-To add an element one can use the the \texttt{push\_istack} function. Since the stack is implemented using a resizable array checking if maximum capacity has been reached is a must. The index of where to push the element can be gained through the stack length member.
+To add an element one can use the \texttt{push\_istack} function. Since the stack is implemented using a resizable array checking if maximum capacity has been reached is a must. The index of where to push the element can be gained through the stack length member.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:push-stack, title=include/sequence/istack.h]
 /// @brief Pushes a single element to the top of the structure.
 /// @param stack Structure to push into.
 /// @param element Element buffer to push.
 void push_istack(istack_s * const stack, void const * const element);
 \end{lstlisting}
-\end{minipage}
 
-Firstly, checking if stack's length has reached the capacity for resizing into a new chunk of memory. Since the structures grow exponentially, starting at a specific power of two chunk, it is important to resize it into \texttt{ISTACK\_CHUNK} if \texttt{length} member is zero and else to continue with doubling.
+Firstly, we check if stack's length has reached the capacity for resizing into a new chunk of memory. Since the structures grow exponentially, starting at a specific power of two chunk, it is important to resize it into \texttt{ISTACK\_CHUNK} if \texttt{length} member is zero or else continue with doubling.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:push-stack-01, title=source/sequence/istack.c]
 {
     // ...
@@ -403,12 +342,9 @@ Firstly, checking if stack's length has reached the capacity for resizing into a
     }
     // ...
 \end{lstlisting}
-\end{minipage}
 
 As the size of a single element is user-define, the only optimal way to copy the element into our structure is to use \texttt{memcpy}. Because the \texttt{element} parameter and \texttt{elements} stack member are stored in two different memory locations \texttt{memcpy} and its speed can be utilized.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:push-stack-01, title=source/sequence/istack.c]
     // ...
     // push element knowing the elements array can fit it
@@ -416,26 +352,20 @@ As the size of a single element is user-define, the only optimal way to copy the
     stack->length++;
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Pop from stack}
 
 Removal of elements is done through the \texttt{pop\_istack} function. If the structure is empty the program logically errors.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:pop-stack, title=include/sequence/istack.h]
 /// @brief Pops a single element from the top of the structure.
 /// @param stack Structure to pop from.
 /// @param buffer Element buffer to save pop.
 void pop_istack(istack_s * const stack, void * const buffer);
-\end{lstlisting} 
-\end{minipage} 
+\end{lstlisting}
 
-Popping the top element is as simple as getting the element at decrementing \texttt{length}, using it as the index position and copying into a temporary variable parameter.
+Popping the top element is as simple as getting the element at decremented \texttt{length}, using it as the index position and copying into a temporary variable parameter.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:pop-stack-01, title=source/sequence/istack.c]
 {
     // ...
@@ -443,12 +373,9 @@ Popping the top element is as simple as getting the element at decrementing \tex
     stack->length--;
     memcpy(buffer, stack->elements + (stack->length * stack->size), stack->size);
 \end{lstlisting}
-\end{minipage}
 
-The structure adjusts itself during growth, therefore it is important to not waste memory. Thus after reaching a smaller power of two capacity the stack automatically shrinks. Chunk length is a special case where if the capacity goes below it, the memory array stays the same, but only until reaching zero. After that it is set to zero.
+The structure adjusts itself during growth, therefore it is important to not waste memory. After reaching a smaller power of two capacity the stack automatically shrinks. Chunk length is a special case where if the capacity goes below it, the memory array stays the same, but only until reaching zero. After that it is set to zero.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:pop-stack-02, title=source/sequence/istack.c]
     // ...
     if (stack->length <= stack->capacity / CERPEC_FACTOR && (stack->length > ISTACK_CHUNK || !stack->length)) {
@@ -456,26 +383,20 @@ The structure adjusts itself during growth, therefore it is important to not was
     }
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Peep the stack}
 
 Peeping the last added element via \texttt{peep\_istack} is a little bit like popping it.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:pop-stack, title=include/sequence/istack.h]
 /// @brief Peeps a single element from the top of the structure.
 /// @param stack Structure to peep.
 /// @param buffer Element buffer to save peep.
 void peep_istack(istack_s const * const stack, void * const buffer);
 \end{lstlisting} 
-\end{minipage} 
 
-The idea is to just get the element index at \(LENGTH - 1\) and save it into a temporary parameter.
+The idea is to just get the element index at \(length - 1\) and save it into a temporary parameter.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:peep-stack-01, title=source/sequence/istack.c]
 {
     // ...
@@ -483,14 +404,11 @@ The idea is to just get the element index at \(LENGTH - 1\) and save it into a t
     memcpy(buffer, stack->elements + ((stack->length - 1) * stack->size), stack->size);
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{For each element}
 
-Each element can be accessed and manipulated through the special \texttt{each\_istack} function, which iterates beginning not at the top, but at the bottom, while making its way up to the top. The reason it starts at the bottom is because it makes the code printing the values slightly shorter.
+Each element can be accessed and manipulated through the special \texttt{each\_istack} function. This function iterates not at the top, but at the bottom, while making its way up to the top. The reason it starts at the bottom is because it makes the code iterating through the values shorter.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack, title=include/sequence/istack.h]
 /// @brief Iterates over each element in structure starting from the beginning.
 /// @param stack Structure to iterate over.
@@ -498,12 +416,9 @@ Each element can be accessed and manipulated through the special \texttt{each\_i
 /// @param am Generic arguments to use in function pointer.
 void each_istack(istack_s const * const stack, manage_fn const manage, void * const am);
 \end{lstlisting} 
-\end{minipage} 
 
-All the element are in an array, thus iterating over them is as simple as using an empty for loop one-liner. The \texttt{manage} function pointer, together with its \texttt{arguments}, allows direct access to the element, making manipulation is possible. If \texttt{manage} returns false, the iteration automatically stops, kinda like the \texttt{break} keyword in a classic for loop.
+All the elements are in an array, thus iterating over them is as simple as using an empty for loop one-liner. The \texttt{manage} function pointer, together with its \texttt{arguments}, allows direct access to the element, making manipulation is possible. If \texttt{manage} returns false, the iteration automatically stops, kinda like the \texttt{break} keyword in a classic for loop.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack-01, title=source/sequence/istack.c]
 {
     // ...
@@ -511,14 +426,11 @@ All the element are in an array, thus iterating over them is as simple as using 
     for (char * e = stack->elements; e < stack->elements + (stack->length * stack->size) && manage(e, am); e += stack->size) {}
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Apply to all elements}
 
-The \texttt{apply\_istack} gives access to all the elements as if they were inside a continuous array, which is really simple for this stacks, but it is extremely hard to implement for structures in other chapters, like \nameref{ch:queue} and \nameref{ch:deque}. The main use of \texttt{apply\_istack} is to sort the array of elements as fast as the sorting function pointer \texttt{process} and its generic \texttt{arguments} allow.
+The \texttt{apply\_istack} gives access to all the elements as if they were inside a continuous array, which is really simple for this stacks, but it is extremely hard to implement for structures in the next chapters - \nameref{ch:queue} and \nameref{ch:deque}. The main use of \texttt{apply\_istack} is to sort the array of elements as fast as the sorting function pointer \texttt{process} and its generic \texttt{arguments} allow.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:apply-stack, title=include/sequence/istack.h]
 /// @brief Apply each element in structure into an array to manage.
 /// @param stack Structure to map.
@@ -526,12 +438,9 @@ The \texttt{apply\_istack} gives access to all the elements as if they were insi
 /// @param ap Generic arguments to use in function pointer.
 void apply_istack(istack_s const * const stack, process_fn const process, void * const ap);
 \end{lstlisting} 
-\end{minipage} 
 
 Similarly to the \texttt{each\_istack}, the \texttt{apply\_istack} only has one line of code - the \texttt{process} function pointer itself.
 
-\noindent
-\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack-01, title=source/sequence/istack.c]
 {
     // ...
@@ -539,7 +448,6 @@ Similarly to the \texttt{each\_istack}, the \texttt{apply\_istack} only has one 
     process(stack->elements, stack->length, ap);
 }
 \end{lstlisting}
-\end{minipage}
 
 \section{Example usages}
 
@@ -547,8 +455,8 @@ Here are some example usages of the infinite stack. Each example show a stack of
 
 \subsection{Creating clearing and destroying a stack}
 
-\noindent
-\begin{minipage}{\linewidth}
+This example shows how \texttt{stack} creation, clearing and destroying are performed in code.
+
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack-01]
 #include <sequence/istack.h>
 
@@ -571,12 +479,11 @@ int main(void) {
     return 0;
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Pushing, peeping and popping elements}
 
-\noindent
-\begin{minipage}{\linewidth}
+Code showing push, peep and pop example for 10 integer elements.
+
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack-01]
 #include <stdio.h>
 #include <sequence/istack.h>
@@ -610,12 +517,11 @@ int main(void) {
     return 0;
 }
 \end{lstlisting}
-\end{minipage}
 
 \subsection{Iterating and sorting elements}
 
-\noindent
-\begin{minipage}{\linewidth}
+Iterating and applying a sorting function to the \texttt{stack} which prints each element, then reverses the ordering in the structure, and lastly prints the \texttt{stack} again, but with elements in reverse order.
+
 \begin{lstlisting}[language=C, style=CodeEditor, label=lst:each-stack-01]
 #include <stdio.h>
 #include <stdlib.h>
@@ -666,7 +572,6 @@ int main(void) {
     return 0;
 }
 \end{lstlisting}
-\end{minipage}
 
 \section{On a final note...}
 
