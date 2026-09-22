@@ -59,13 +59,6 @@
 \usepackage[varvw]{newtxmath}       % selects Times Roman as basic font
 \usepackage{ulem}
 
-\usepackage{titlesec}
-
-\titleclass{\part}{top}
-\titleformat{\part}[display]
-  {\normalfont\huge\bfseries}{\partname\ \thepart}{20pt}{\Huge}
-\titlespacing*{\part}{0pt}{50pt}{40pt}
-
 \usepackage[backend=biber, style=numeric, refsection=chapter]{biblatex}
 \addbibresource{references.bib}
 
@@ -74,6 +67,10 @@
 
 \usepackage[T1]{fontenc}
 \usepackage{tipa}
+
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{booktabs}
 
 \author{Matej Dedina}
 \title{A C Data Structure Book}
@@ -118,6 +115,7 @@ If I have to put a disclaimer I just want to clarify that the reason why some pa
 \include{chapter/sequential/deque}
 
 \include{part/two}
+\include{chapter/list/straight-list}
 
 %\include{appendix}
 
