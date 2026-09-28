@@ -18,12 +18,13 @@ The straight list can have either one or many forms of realizations in C, depend
 NULL represents a null pointer constant, that is, a pointer that does not point to anything.
 \end{infobox}
 
-Other forms of lists, like in this chapter, represent lists with arrays and are more concerned with how nodes are stored inside arrays. The issues they solve center around value packing inside arrays (sparse and dense arrays), and array node order based on insertions (sequential and pseudorandom ordering). The classing linked list can also be viewed from an array perspective, since the used memory can be represented as a one-dimensional array.
+Other forms of lists, like in this chapter, represent lists with arrays and are more concerned with how nodes are stored inside arrays. The issues they solve center around value packing inside arrays (sparse and dense arrays), and array node order based on insertions (sequential and pseudorandom ordering). The classic linked list can also be viewed from an array perspective, since the used memory can be represented as a one-dimensional array, see \autoref{fig:list-classification}.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/straight-list/list-classification.pdf}
-    \caption{Classification of list-esque data structures. The ones in bold contain this part's list implementations. PACKING refers to how the data is stored inside the array - sparse means holes, dense no holes. ORDERING is based on array, not list, order relative to all memory or chunks of it.}
+    \includegraphics[width=0.6\textwidth]{figures/straight-list/list-classification.pdf}
+    \caption{Classification of list-esque data structures. The ones in bold contain this part's list implementations. PACKING refers to how the data is stored inside the array - sparse means holes, dense no holes. ORDERING is based on array, not list, order relative to all memory or chunks of it.
+    \newline*sparse arrays are usually implemented as pseudorandomly ordered arrays, but we this chapter explains sequential ordering sparse arrays.}
     \label{fig:list-classification}
 \end{figure}
 
@@ -31,11 +32,18 @@ This chapter will only cover the classic linked list, sparse array and straight 
 
 \subsection{A bread of crumbs - the linked list}
 
-The ordering of elements in a linked list (in memory) depends on the function which retrieves an uninitialized point in memory. Mostly that is done using the \texttt{malloc()}, short for [m]emory-[alloc]ation, function. Most lectures teach linked lists in C with the help of \texttt{malloc()}. With \texttt{malloc()}, memory is given to you in a way that is not guaranteed to be continuous, so the order of elements in memory is not guaranteed to be the same as the order of elements in the list. Ideally, the order of elements in memory should be the same as in the list, mainly to avoid jumping back and forth in memory, which was visited either directly or in the area. On the other hand the memory can be too far away, so visiting it and returning will simply add, spoiler alert - pointless overhead. 
+The ordering of elements in a linked list (in memory) depends on the function which retrieves an uninitialized point in memory. Mostly that is done using the \texttt{malloc()}, short for [m]emory-[alloc]ation, function. Most lectures teach linked lists in C with the help of \texttt{malloc()}. With \texttt{malloc()}, memory is given to you in a way that is not guaranteed to be continuous, so the order of elements in memory is not guaranteed to be the same as the order of elements in the list, see \autoref{fig:linked-list}. Ideally, the order of elements in memory should be the same as in the list, mainly to avoid jumping back and forth in memory, which was visited either directly or in the area. On the other hand the memory can be too far away, so visiting it and returning will simply add, spoiler alert - pointless overhead.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/straight-list/linked-list.pdf}
+    \caption{Linked list example with six nodes laid out in memory. The order in memory is not sequential and the nodes themselves are also sparsely packed.}
+    \label{fig:linked-list}
+\end{figure}
 
 The simplest solution would be to not use \texttt{malloc}. As long as the list has no references, only data, and is only being inserted into, we can use an array using \sout{\texttt{malloc()}, if the array is short, we can use \texttt{realloc()}} local memory, or even global memory!!! So what if we are just stuck with a finite array to store data, the \texttt{malloc()} school class enemy is no more. So what to do if we wanna allow element removal?
 
-\subsection{A slice of emmental - the sparse array}
+\subsection{A slice-off emmental - the sparse array}
 
 The sparse array allows element removal, but under some conditions:
 
@@ -46,5 +54,13 @@ The sparse array allows element removal, but under some conditions:
 
 Solution number one must therefore save a count of all insertion calls, not just the current number of elements in the sparse array. This is because the next element must be inserted at the rightmost position, which is not necessarily the same as the current number of elements in the sparse array.
 
-Solution number two has two common solutions, either a special value is used to indicate that the element is empty, or another array is used to tell where to skip to the next valid element. The first solution still forces you to check in if the memory space is valid, which can be process intensive if elements are separated by oceans of special empty values. And we loose the special value - we won' be able to use it if needed. The one point fifth solution requires another array of booleans or even bits to check if a space is empty - \texttt{true} if filled, \texttt{false} if empty. The second solution is more efficient, but requires more memory to store the second array and more logic. The empty spaces are also called holes, so if there is a hole, then why not just fill it?
+Solution number two has two common solutions, either a special value is used to indicate that the element is empty, or another array is used to tell where to skip to the next valid element. The first solution still forces you to check in if the memory space is valid, which can be process intensive if elements are separated by oceans of special empty values. And we loose the special value - we won' be able to use it if needed. The one point fifth solution requires another array of Booleans or even bits to check if a space is empty - \texttt{true} if filled, \texttt{false} if empty. The second solution is more efficient, but requires more memory to store the second array and more logic. The empty spaces are also called holes, so if there is a hole, then why not just fill it?
+
+\subsection{A stack of butter - the straight list}
+
+Holes are a problem in sparse arrays, so the solution is to fill them. To fill them, though, we must track them. To track them, we must store them, and the simplest way to store and retrieve them is in a stack. The stack is a data structure that allows you to store and retrieve elements in a last-in-first-out (LIFO) manner. One way to implement the stack is to use a separate array to store the hole indexes. The straight list way of implementing a stack is to use the same list, more specifically, add one more head reference to the list, which will point to the first hole in the list. The straight list structure will serve as both the linked list for elements and the stack for empty spaces. With this implementation we loose the sequential array ordering of the sparse list, but the sparsity problem gets minimized (not solved). To insert an element, we first check if the stack is empty, if it is, we insert the element at the end of the list, otherwise we pop the top of the stack and insert the element at that hole index. 
+
+The structure works like a dynamic array, the straight list must expand when elements are inserted and capacity is hit, and shrink if a smaller capacity is available. The biggest liability is thus shrinking, because if the stack has holes, we can't shrink the list array via reallocation. We must allocate a new array, copy the elements over in list order, and free the old array. The only benefit of this is that the shrunken structure has the same list and array element order - the element packing is dense and ordering is sequential. 
+
+A way to remove excess holes after each removal is to only push indexes of holes that are not at the end of the underlying array. When the last element from the list is removed, we can also reset the stack back to empty, by just setting its head reference to NULL.
 
