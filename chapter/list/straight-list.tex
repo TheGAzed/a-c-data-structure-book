@@ -24,7 +24,7 @@ Other forms of lists, like in this chapter, represent lists with arrays and are 
     \centering
     \includegraphics[width=0.6\textwidth]{figures/straight-list/list-classification.pdf}
     \caption{Classification of list-esque data structures. The ones in bold contain this part's list implementations. PACKING refers to how the data is stored inside the array - sparse means holes, dense no holes. ORDERING is based on array, not list, order relative to all memory or chunks of it.
-    \newline*sparse arrays are usually implemented as pseudorandomly ordered arrays, but we this chapter explains sequential ordering sparse arrays.}
+    \newline*sparse arrays are usually implemented as pseudorandomly ordered arrays, but can also be implemented as sequentially ordered arrays with boolean indicator arrays.}
     \label{fig:list-classification}
 \end{figure}
 
@@ -32,13 +32,13 @@ This chapter will only cover the classic linked list, sparse array and straight 
 
 \subsection{A bread of crumbs - the linked list}
 
-The ordering of elements in a linked list (in memory) depends on the function which retrieves an uninitialized point in memory. Mostly that is done using the \texttt{malloc()}, short for [m]emory-[alloc]ation, function. Most lectures teach linked lists in C with the help of \texttt{malloc()}. With \texttt{malloc()}, memory is given to you in a way that is not guaranteed to be continuous, so the order of elements in memory is not guaranteed to be the same as the order of elements in the list, see \autoref{fig:linked-list}. Ideally, the order of elements in memory should be the same as in the list, mainly to avoid jumping back and forth in memory, which was visited either directly or in the area. On the other hand the memory can be too far away, so visiting it and returning will simply add, spoiler alert - pointless overhead.
+The ordering of elements in a linked list (in memory) depends on the function which retrieves an uninitialized point in memory. Mostly that is done using the \texttt{malloc()}, short for [m]emory-[alloc]ation, function. Most lectures teach linked lists in C with the help of \texttt{malloc()}. With \texttt{malloc()}, memory is given to you in a way that is not guaranteed to be continuous, so the order of elements in memory is not guaranteed to be the same as the order of elements in the list, see \autoref{fig:linked-list-normal}. Ideally, the order of elements in memory should be the same as in the list, mainly to avoid jumping back and forth in memory, which was visited either directly or in the area. On the other hand the memory can be too far away, so visiting it and returning will simply add, spoiler alert - pointless overhead.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{figures/straight-list/linked-list.pdf}
     \caption{Linked list example with six nodes laid out in memory. The order in memory is not sequential and the nodes themselves are also sparsely packed.}
-    \label{fig:linked-list}
+    \label{fig:linked-list-normal}
 \end{figure}
 
 The simplest solution would be to not use \texttt{malloc}. As long as the list has no references, only data, and is only being inserted into, we can use an array using \sout{\texttt{malloc()}, if the array is short, we can use \texttt{realloc()}} local memory, or even global memory!!! So what if we are just stuck with a finite array to store data, the \texttt{malloc()} school class enemy is no more. So what to do if we wanna allow element removal?
@@ -52,9 +52,27 @@ The sparse array allows element removal, but under some conditions:
     \item If an element is removed, the list must indicate that the place the element was saved is empty, or to be more precise, inaccessible.
 \end{enumerate}
 
-Solution number one must therefore save a count of all insertion calls, not just the current number of elements in the sparse array. This is because the next element must be inserted at the rightmost position, which is not necessarily the same as the current number of elements in the sparse array.
+Solution number one must therefore save a count of all insertion calls, not just the current number of elements in the sparse array. This is because the next element must be inserted at the rightmost position, which is not necessarily the same as the current number of elements in the sparse array, see \autoref{fig:special-value-sparse-array}.
 
-Solution number two has two common solutions, either a special value is used to indicate that the element is empty, or another array is used to tell where to skip to the next valid element. The first solution still forces you to check in if the memory space is valid, which can be process intensive if elements are separated by oceans of special empty values. And we loose the special value - we won' be able to use it if needed. The one point fifth solution requires another array of Booleans or even bits to check if a space is empty - \texttt{true} if filled, \texttt{false} if empty. The second solution is more efficient, but requires more memory to store the second array and more logic. The empty spaces are also called holes, so if there is a hole, then why not just fill it?
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/straight-list/special-value-set.pdf}
+    \caption{A special value sparse array example using the count of playable chess pieces as an indicator that the element, i.e. chess piece, is not available. We got lucky that the chess piece count of zero also represents the non-existence of a piece on the board. The bottom letters are short for (P)awn, (R)ook, K(N)ight (rhymes with (N)ight), (B)ishop, (Q)ueen, and (K)ing. The top part above the letters represents the chess pieces as objects with attributes - like position on the board or usage count, values represent the count and the images represent image data to be rendered on the screen (notice how all the data is tightly packed, but the holes are creating gaps). The topmost part are array indexes, kind of like ids in a database.}
+    \label{fig:special-value-sparse-array}
+\end{figure}
+
+The one point fifth solution requires another array of Booleans or even bits to check if a space is empty - \texttt{true} if filled, \texttt{false} if empty. This solution is referred to as a bit array, see \autoref{fig:bit-array}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/straight-list/bit-array.pdf}
+    \caption{A bit array sparse array example using bit to show which pieces are playable. The bottom black letters are short for (P)awn, (R)ook, K(N)ight (still rhymes with (N)ight), (B)ishop, (Q)ueen, and (K)ing, the numbers next to some letters are used to differentiate between the same piece type, like tow rooks, so rook 0 and rook 1. The smaller values above the black letters represent the set bits, with zero meaning the chess piece is dead, and one meaning the chess piece is alive on the board. Above them are chess piece objects and their data. The topmost part are array indexes, kind of like ids in a database in hexadecimal form. Notice the huge gap between the first and last pawn, which may have an impact on performance if the data is not cached.}
+    \label{fig:bit-array}
+\end{figure}
+
+Solution number two has two common solutions, either a special value is used to indicate that the element is empty, or another array is used to tell where to skip to the next valid element. The first solution still forces you to check if the memory space is valid, which can be processor intensive if elements are separated by oceans of special empty values. And the worst part, we loose the special value, that means we won't be able to use it if needed. This solution is also called a Sparse array
+
+The second solution is more efficient, but requires more memory to store the second array and more logic.. The empty spaces are also called holes, so if there is a hole, then why not just fill it?
 
 \subsection{A stack of butter - the straight list}
 
